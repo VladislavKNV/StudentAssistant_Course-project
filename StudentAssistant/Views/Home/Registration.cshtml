@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "Registration";
+}
+<main class="block_main_reg_auto">
+    <div class="main_content">
+
+        <form method="post" action="~/Home/registration">
+            <div class="Register_Auto_block">
+
+                <p class="Register_Auto_tittle">Регистрация</p>
+
+                <div class="input_block">
+                    <p class="Register_Auto_text">Логин</p>
+                    <input id="login" name="login" value="@ViewBag.login" type="text" class="Register_Auto_Input_field" />
+                </div>
+                <p style=" color: red;">@ViewBag.ErrorLogin</p>
+
+                <div class="input_block">
+                    <p class="Register_Auto_text">Электронная почта</p>
+                    <input id="email" name="email" type="email" value="@ViewBag.email" class="Register_Auto_Input_field" />
+                </div>
+                <p style=" color: red;">@ViewBag.ErrorEmail</p>
+
+                <div class="input_block">
+                    <p class="Register_Auto_text">Пароль</p>
+                    <input id="password" name="password" type="password" class="Register_Auto_Input_field" />
+                </div>
+                <p style=" color: red;">@ViewBag.ErrorPassword</p>
+
+                <div class="input_block">
+                    <p class="Register_Auto_text">Повтор пароля</p>
+                    <input id="confirm_password" name="confirm_password" type="password" class="Register_Auto_Input_field" />
+                </div>
+                <p style=" color: red;">@ViewBag.Error</p>
+
+
+                <input class="btn btn_reg_auto" type="submit" value="Зарегистрироваться" />
+            </div>
+        </form>
+
+    </div>
+</main>

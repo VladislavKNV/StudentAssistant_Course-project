@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/dialog_background"
+    android:padding="20dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/edit_text_subject_name_update1"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:hint="Введите название предмета">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text_subject_name_update"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:textSize="18dp"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+</LinearLayout>

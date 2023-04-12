@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>StudentAssistant</title>
+</head>
+@Styles.Render("~/Content/css")
+<body>
+    <div id="header">
+        <a href="../Home/MainPage"><img src="../../Content/Images/logo_4.jpeg" alt="My Website" /></a>
+        <div id="navigation">
+            <ul>
+                <li><a href="../Home/MainPage">Главная</a></li>
+                <li><a href="#">Личный кабинет</a></li>
+                <li><a href="../Home/Autorisation">Войти</a></li>
+                <li><a href="../Home/Registration">Регистрация</a></li>
+            </ul>
+        </div>
+    </div>
+
+    @RenderBody()
+    <footer id="footer">
+        <p>
+            Copyright &copy; StudentAssistant 2023
+            <br>All rights reserved
+        </p>
+    </footer>
+</body>
+</html>

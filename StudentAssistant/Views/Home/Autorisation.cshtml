@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Autorisation";
+}
+<main class="block_main_reg_auto">
+    <div class="main_content">
+        <form method="post" action="~/Home/autorisation">
+            <div class="Register_Auto_block">
+
+                <p class="Register_Auto_tittle">Авторизация</p>
+
+                <div class="input_block">
+                    <p class="Register_Auto_text">Логин</p>
+                    <input id="login" name="login" type="text" value="@ViewBag.login" class="Register_Auto_Input_field" />
+                </div>
+                <p style=" color: red; ">@ViewBag.ErrorLogin</p>
+
+                <div class="input_block">
+                    <p class="Register_Auto_text">Пароль</p>
+                    <input id="password" name="password" type="password" class="Register_Auto_Input_field" />
+                </div>
+
+                <p style=" color: red; ">@ViewBag.Error</p>
+
+                <input class="btn btn_reg_auto" type="submit" value="Войти" />
+                <p class="Autorisation_route_to_reg">
+                    <a href="~/Home/Registration" style="text-decoration:none">Еще нет аккаунта? Зарегистрируйся</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</main>

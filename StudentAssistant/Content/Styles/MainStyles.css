@@ -1,0 +1,236 @@
+﻿*{
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #fff; /* задаем цвет фона страницы  #1c2331*/
+    color: #000; /* задаем цвет текста на странице */
+}
+
+/* задаем навигационное меню */
+
+#header {
+    background-color: #2c3e50;
+    color: #fff;
+    height: 65px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    left: 0;
+}
+
+    #header img {
+        margin-left: 60px;/* может и не надо*/
+    }
+
+
+#navigation ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    margin-right: 60px; /* добавляем отступ справа для меню */
+        margin-left: auto; /* центрируем меню по горизонтали */
+    }
+
+#navigation li {
+    display: inline-block; /* помещаем ссылки на одной строке */
+}
+
+#navigation a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    margin-right: 10px; /* добавляем отступ справа для каждой ссылки */
+    margin-left: 10px; /* добавляем отступ слева для каждой ссылки */
+}
+
+#navigation a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+}
+
+/* задаем тело страницы */
+
+#content {
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* задаем slider */
+
+.slider {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+    .slider img {
+        width: 100%;
+        height: auto;
+        max-height: 600px;
+        object-fit: cover;
+    }
+
+.slick-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+    .slick-dots li {
+        list-style: none;
+        margin: 0 5px;
+    }
+
+    .slick-dots button {
+        font-size: 0;
+        line-height: 0;
+        display: block;
+        width: 10px;
+        height: 10px;
+        padding: 5px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 2px solid #000;
+        cursor: pointer;
+    }
+
+        .slick-dots button:hover,
+        .slick-dots button:focus {
+            outline: none;
+        }
+
+        .slick-dots button.slick-active {
+            background-color: #000;
+        }
+
+
+/* задаем footer */
+
+#footer {
+    background-color: #2c3e50;
+    color: #fff;
+    padding: 50px;
+    text-align: center;
+}
+
+/* задаем блоки на главной странице */
+
+.text-block {
+    width: 500px;
+    height: 280px;
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 14px 28px rgb(0 0 0 / 25%), 0 10px 10px rgb(0 0 0 / 22%);
+}
+
+.text-block {
+    flex-basis: calc(33.33% - 20px);
+    margin-bottom: 40px;
+    padding: 20px;
+    font-size: 22px;
+    text-indent: 20px;
+}
+
+    .text-block:nth-child(1),
+    .text-block:nth-child(3) {
+        flex-basis: calc(66.66% - 20px);
+        font-size: 22px;
+    }
+
+    .text-block:nth-child(2) {
+        margin-left: auto;
+        font-size: 22px;
+    }
+
+
+.text-pad {
+    padding: 35px;
+}
+/*регистрация и авторизация*/
+.main_content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Register_Auto_block {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0px 0px 24px 0px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    width: 410px;
+    margin-bottom: 6rem;
+    margin-top: 6rem;
+}
+
+.Register_Auto_tittle {
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.input_block {
+    margin-bottom: 10px;
+}
+
+.Register_Auto_text {
+    font-size: 20px;
+    font-family: Bicubik; /*Bicubik*/
+    margin-top: 1.6rem;
+    margin-bottom: 0.7rem;
+}
+
+.Register_Auto_Input_field {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 18px;
+    padding: 10px;
+    width: 100%;
+}
+
+.Autorisation_route_to_reg {
+    margin-top: 1.2rem;
+    font-size: 19px;
+}
+
+.btn_reg_auto {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    margin-top: 20px;
+    padding: 10px 20px;
+    width: 100%;
+}
+
+    .btn_reg:hover {
+        background-color: #3e8e41;
+        font-weight: bold;
+    }
+
+
+.na {
+    border: 1px solid red;
+}
+
+.error_reg_auto {
+    color: red;
+    margin-top: 1rem;
+    font-size: 16px;
+}
