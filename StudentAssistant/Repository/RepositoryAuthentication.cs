@@ -153,5 +153,188 @@ namespace StudentAssistant.Repository
 			}
 				
 		}
+
+
+		public List<Users> GetUsers()
+		{
+			var usersList = new List<Users>();
+			var queryString = "select id,RoleId,Login,Email from Users";
+
+			// Создание и открытие соединения в блоке using.
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				// Создание объеков команд и параметров.
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						object dbVal = null;
+
+						var user = new Users();
+						user.id = (int)reader.GetValue(0);
+
+						user.RoleId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							user.Login = (dbVal as string).Trim();
+						}
+
+						dbVal = (string)reader.GetValue(3);
+						if (!(dbVal is DBNull))
+						{
+							user.Email = (dbVal as string).Trim();
+						}
+
+						usersList.Add(user);
+					}
+				}
+			}
+			return usersList;
+		}
+
+
+		public List<Subjects> GetSubjects(string userId)
+		{
+			var subjectsList = new List<Subjects>();
+			var queryString = "select id, UserId, Name from Subjects where UserId=@UserId";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@UserId", userId);
+
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						object dbVal = null;
+
+						var subject = new Subjects();
+						subject.SubjectId = (int)reader.GetValue(0);
+						subject.UserId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							subject.Name = (dbVal as string).Trim();
+						}
+
+						subjectsList.Add(subject);
+					}
+				}
+			}
+
+			return subjectsList;
+		}
+
+
+
+
+		public int GetLabsCount(int subjectsId)
+		{
+			var queryString = "select count(*) from Labs where SubjectId=@SubjectId";
+			var count = 0;
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", subjectsId);
+
+				connection.Open();
+
+				count = (int)command.ExecuteScalar();
+			}
+
+			return count;
+		}
+
+		public int GetProtectedLabsCount(int subjectsId)
+		{
+			var queryString = "select count(*) from Labs where SubjectId=@SubjectId and LabProtected=1";
+			var count = 0;
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", subjectsId);
+
+				connection.Open();
+
+				count = (int)command.ExecuteScalar();
+			}
+
+			return count;
+		}
+
+
+		public List<Session> GetSessions(int subjectsId)
+		{
+			var sessionList = new List<Session>();
+			var queryString = "select id, SubjectId, Type, Status, Mark, DateTime, Auditorium from Session where SubjectId=@SubjectId";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", subjectsId);
+
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						object dbVal = null;
+
+						var session = new Session();
+						session.SessionId = (int)reader.GetValue(0);
+						session.SubjectId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							session.Type = (dbVal as string).Trim();
+						}
+
+						dbVal = reader.GetValue(3);
+						if (!(dbVal is DBNull))
+						{
+							session.Status = (dbVal as string).Trim();
+						}
+
+						dbVal = reader.GetValue(4);
+						if (!(dbVal is DBNull))
+						{
+							session.Mark = reader.GetInt32(4);
+						}
+
+						dbVal = reader.GetValue(5);
+						if (!(dbVal is DBNull))
+						{
+							session.DateTime = (dbVal as string).Trim();
+						}
+
+						dbVal = reader.GetValue(6);
+						if (!(dbVal is DBNull))
+						{
+							session.Auditorium = (dbVal as string).Trim();
+						}
+
+						sessionList.Add(session);
+					}
+				}
+			}
+
+			return sessionList;
+		}
+
+
+
 	}
 }

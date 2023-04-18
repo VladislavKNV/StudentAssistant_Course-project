@@ -234,3 +234,36 @@ body {
     margin-top: 1rem;
     font-size: 16px;
 }
+
+
+
+/*////////////////////////////////////////////*/
+
+/* стили для блока с классом main_content */
+.main_content {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* стили для таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 20px
+}
+
+/* стили для заголовка таблицы */
+th {
+    padding: 10px;
+    background-color: #f5f5f5;
+    font-weight: bold;
+    text-align: left;
+    border: none;
+}
+
+/* стили для ячеек таблицы */
+td {
+    padding: 10px;
+    border: none;
+}

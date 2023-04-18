@@ -1,6 +1,8 @@
 ﻿using StudentAssistant.Models;
 using StudentAssistant.Repository;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
@@ -36,6 +38,12 @@ namespace StudentAssistant.Controllers
 		{
 			return View();
 		}
+
+		//public ActionResult PersonalAccount()
+		//{
+			//return View();
+		//}
+
 
 		[HttpPost]
 		public ActionResult registration(string login, string email, string password, string confirm_password)
@@ -119,7 +127,6 @@ namespace StudentAssistant.Controllers
 				Users user1 = repositoryAuthentication.Get(login);
 
 				HttpCookie Data = new HttpCookie("Data");
-
 				// Добавление cookies
 				Data.Values.Add("Id", user1.id.ToString());
 				Data.Values.Add("Login", user1.Login.ToString());
@@ -192,7 +199,6 @@ namespace StudentAssistant.Controllers
 
 
 				HttpCookie Data = new HttpCookie("Data");
-
 				//Add Cookies
 				Data.Values.Add("Id", user1.id.ToString());
 				Data.Values.Add("Login", user1.Login.ToString());
@@ -216,6 +222,108 @@ namespace StudentAssistant.Controllers
 				ViewBag.error = "Неверный логин или пароль";
 				return View(this);
 			}
+		}
+
+
+
+		[HttpGet]
+		public ActionResult PersonalAccount()
+		{
+
+			// Получение куки с именем "Data"
+			var dataCookie = Request.Cookies["Data"];
+
+			if (dataCookie != null)
+			{
+				// Получение значений из куки
+				var id = dataCookie.Values["Id"];
+				var login = dataCookie.Values["Login"];
+				var email = dataCookie.Values["Email"];
+				var password = dataCookie.Values["Password"];
+				var roleId = dataCookie.Values["RoleId"];
+
+				if (roleId == "2")
+				{
+					ViewBag.role = "2";
+
+					bool Status = true;
+					int countExam = 0;
+					int countOffset = 0;
+					int sumMark = 0;
+					int countMark = 0;
+					int countAllLabs = 0;
+					int countAllProtectedLabs = 0;
+					var subjectsList = new List<Subjects>();
+					var sessionList = new List<Session>();
+					var labsList = new ArrayList();
+					subjectsList = repositoryAuthentication.GetSubjects(id);
+					foreach (var subject in subjectsList)
+					{
+						int countLabs = repositoryAuthentication.GetLabsCount(subject.SubjectId);
+						int countProtectedLabs = repositoryAuthentication.GetProtectedLabsCount(subject.SubjectId);
+						string progressSubject = countProtectedLabs + "/" + countLabs;
+						labsList.Add(progressSubject);
+						countAllLabs += countLabs;
+						countAllProtectedLabs += countProtectedLabs;
+
+
+
+						sessionList = repositoryAuthentication.GetSessions(subject.SubjectId);
+						foreach (var session in sessionList)
+						{
+							if (session.Type == "Экзамен")
+							{
+								countExam++;
+							}
+							else { countOffset++; }
+							if (session.Mark != 0) { countMark++; }
+							sumMark += session.Mark;
+							if (session.Status == "Не допущен")
+							{
+								Status = false;
+							}
+						}
+					}
+					double percent = ((double)countAllProtectedLabs / (double)countAllLabs) * 100;
+					percent = Math.Round(percent, 2);
+					string formattedPercent = percent.ToString();
+
+					//----------------------------------------------
+
+					if (countMark != 0)
+					{
+						ViewBag.averageMark = sumMark / countMark;
+					}
+					else { ViewBag.averageMark = 0; }
+
+					if (Status == true)
+					{
+						ViewBag.Status = "допущен";
+					}
+					else { ViewBag.Status = "не допущен"; }
+
+					ViewBag.countExam = countExam;
+					ViewBag.countOffset = countOffset;
+					ViewBag.percent = formattedPercent;
+					ViewBag.login = login;
+					ViewBag.subjectList = subjectsList;
+					ViewBag.labList = labsList;
+					ViewBag.countAllLabs = countAllLabs;
+					ViewBag.countAllProtectedLabs = countAllProtectedLabs;
+
+				}
+				else if (roleId == "1")
+				{
+					ViewBag.role = "1";
+					var usersList = new List<Users>();
+					usersList = repositoryAuthentication.GetUsers();
+					ViewBag.usersList = usersList;
+				}
+			}else
+			{
+				return RedirectToAction("Registration");
+			}
+			return View(this);
 		}
 
 	}
