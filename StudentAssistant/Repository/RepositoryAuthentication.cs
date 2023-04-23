@@ -13,7 +13,7 @@ namespace StudentAssistant.Repository
 	public class RepositoryAuthentication
 	{
 		//Строка подключение к бд
-		//string connectionString = "Server=93.125.10.36;Database=Students;Integrated Security=false;User Id=User;Password=2001ksu2001;";
+		//string connectionString = "Server=93.125.10.36;Database=StudenAssistant;Integrated Security=false;User Id=Vlad;Password=50511007;";
 		string connectionString = "Data Source=(local);Initial Catalog=StudentAssistant;Integrated Security=true";
 		//Хеширование
 		/// <summary>
@@ -72,13 +72,6 @@ namespace StudentAssistant.Repository
 			return userId;
 		}
 
-		/// <summary>
-		/// Вход
-		/// </summary>
-		/// <param name="Login">Login пользователя</param>
-		/// <returns></returns>
-		/// 
-
 		public Users Get(string Login)
 		{
 			Users user = null;
@@ -120,8 +113,6 @@ namespace StudentAssistant.Repository
 						{
 							user.Password = (dbVal as string).Trim();
 						}
-
-						
 					}
 				}
 			}
@@ -153,7 +144,6 @@ namespace StudentAssistant.Repository
 			}
 				
 		}
-
 
 		public List<Users> GetUsers()
 		{
@@ -197,7 +187,6 @@ namespace StudentAssistant.Repository
 			return usersList;
 		}
 
-
 		public List<Subjects> GetSubjects(string userId)
 		{
 			var subjectsList = new List<Subjects>();
@@ -234,8 +223,80 @@ namespace StudentAssistant.Repository
 			return subjectsList;
 		}
 
+		public List<Subjects> GetSubjectsForSession(string userId)
+		{
+			var subjectsList = new List<Subjects>();
+			var queryString = "SELECT s.id, s.UserId, s.Name " +
+				  "FROM Subjects s " +
+				  "JOIN Session se ON s.id = se.SubjectId " +
+				  "WHERE s.UserId = @UserId AND se.Status = 'Допущен' AND s.id IN " +
+				  "(SELECT id FROM Subjects WHERE UserId = @UserId)";
 
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@UserId", userId);
 
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						object dbVal = null;
+
+						var subject = new Subjects();
+						subject.SubjectId = (int)reader.GetValue(0);
+						subject.UserId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							subject.Name = (dbVal as string).Trim();
+						}
+
+						subjectsList.Add(subject);
+					}
+				}
+			}
+
+			return subjectsList;
+		}
+
+		public Subjects GetSubjectsByName(string userId, string name)
+		{
+			Subjects subject = new Subjects();
+			var queryString = "select id, UserId, Name from Subjects where UserId=@UserId and Name = @Name";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@UserId", userId);
+				command.Parameters.AddWithValue("@Name", name);
+
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						object dbVal = null;
+
+						subject.SubjectId = (int)reader.GetValue(0);
+						subject.UserId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							subject.Name = (dbVal as string).Trim();
+						}
+
+					}
+				}
+			}
+
+			return subject;
+		}
 
 		public int GetLabsCount(int subjectsId)
 		{
@@ -273,7 +334,6 @@ namespace StudentAssistant.Repository
 			return count;
 		}
 
-
 		public List<Session> GetSessions(int subjectsId)
 		{
 			var sessionList = new List<Session>();
@@ -283,7 +343,6 @@ namespace StudentAssistant.Repository
 			{
 				var command = new SqlCommand(queryString, connection);
 				command.Parameters.AddWithValue("@SubjectId", subjectsId);
-
 				connection.Open();
 
 				using (var reader = command.ExecuteReader())
@@ -334,7 +393,67 @@ namespace StudentAssistant.Repository
 			return sessionList;
 		}
 
+		public bool UpdateMark(int Mark, int subjectId)
+		{
+			var session = new List<Session>();
+			session = GetSessions(subjectId);
 
+			if (session != null)
+			{
+				var queryString = "Update Session Set Mark = @Mark where SubjectId = @subjectId";
+				using (SqlConnection connection = new SqlConnection(connectionString))
+				{
+					foreach (var item in session)
+					{
+						// Create the Command and Parameter objects.
+						var command = new SqlCommand(queryString, connection);
+						command.Parameters.AddWithValue("@SubjectId", item.SubjectId);
+						command.Parameters.AddWithValue("@Mark", Mark);
+
+
+						connection.Open();
+						var reader = command.ExecuteReader();
+						reader.Read();
+					}
+				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		public bool UpdateSession(string dateTime, string auditorium, int subjectId)
+		{
+			var session = new List<Session>();
+			session = GetSessions(subjectId);
+
+			if (session != null)
+			{
+				var queryString = "Update Session Set DateTime = @DateTime, Auditorium = @Auditorium where SubjectId = @SubjectId";
+				using (SqlConnection connection = new SqlConnection(connectionString))
+				{
+					foreach (var item in session)
+					{
+						// Create the Command and Parameter objects.
+						var command = new SqlCommand(queryString, connection);
+						command.Parameters.AddWithValue("@SubjectId", item.SubjectId);
+						command.Parameters.AddWithValue("@DateTime", dateTime);
+						command.Parameters.AddWithValue("@Auditorium", auditorium);
+
+						connection.Open();
+						var reader = command.ExecuteReader();
+						reader.Read();
+					}
+				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 
 	}
 }

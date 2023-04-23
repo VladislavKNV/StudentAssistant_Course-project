@@ -1,12 +1,18 @@
-﻿using StudentAssistant.Models;
+﻿using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json.Linq;
+using StudentAssistant.Models;
 using StudentAssistant.Repository;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using System.Xml.Linq;
 
 namespace StudentAssistant.Controllers
 {
@@ -17,33 +23,42 @@ namespace StudentAssistant.Controllers
 
         //переменные для работы с даными
         int? UserId;
+		string error;
 
 
-        public ActionResult _Layout()
+		public ActionResult _Layout()
         {
             return View();
         }
 
         public ActionResult Registration()
         {
-            return View();
+			ViewBag.checkInput = false;
+			return View();
         }
 
         public ActionResult Autorisation()
         {
-            return View();
+			//Очищение cooki
+			HttpCookie cookie = new HttpCookie("Data");
+			cookie.Expires = DateTime.Now.AddDays(-1);
+			Response.Cookies.Add(cookie);
+			ViewBag.checkInput = false;
+			return View();
         }
 
 		public ActionResult MainPage()
 		{
+			var dataCookie = Request.Cookies["Data"];
+			if (dataCookie == null)
+			{
+				ViewBag.checkInput = false;
+			} else
+			{
+				ViewBag.checkInput = true;
+			}
 			return View();
 		}
-
-		//public ActionResult PersonalAccount()
-		//{
-			//return View();
-		//}
-
 
 		[HttpPost]
 		public ActionResult registration(string login, string email, string password, string confirm_password)
@@ -133,14 +148,16 @@ namespace StudentAssistant.Controllers
 				Data.Values.Add("Email", user1.Email.ToString());
 				Data.Values.Add("Password", user1.Password.ToString());
 				Data.Values.Add("RoleId", user1.RoleId.ToString());
-				Data.Expires = DateTime.Now.AddMinutes(30);
+				Data.Expires = DateTime.Now.AddMinutes(60);
 				Response.Cookies.Add(Data);
 				if (Data == null)
 				{
+					ViewBag.checkInput = false;
 					return View("Registration");
 				}
 				else
 				{
+					ViewBag.checkInput = true;
 					return View("MainPage");
 				}
 			}
@@ -205,14 +222,16 @@ namespace StudentAssistant.Controllers
 				Data.Values.Add("Email", user1.Email.ToString());
 				Data.Values.Add("Password", user1.Password.ToString());
 				Data.Values.Add("RoleId", user1.RoleId.ToString());
-				Data.Expires = DateTime.Now.AddMinutes(30);
+				Data.Expires = DateTime.Now.AddMinutes(60);
 				Response.Cookies.Add(Data);
 				if (Data == null)
 				{
+					ViewBag.checkInput = false;
 					return View("Registration");
 				}
 				else
 				{
+					ViewBag.checkInput = true;
 					return View("MainPage");
 				}
             }
@@ -220,14 +239,13 @@ namespace StudentAssistant.Controllers
 			{
 				ViewBag.login = login;
 				ViewBag.error = "Неверный логин или пароль";
+				ViewBag.checkInput = false;
 				return View(this);
 			}
 		}
 
-
-
 		[HttpGet]
-		public ActionResult PersonalAccount()
+		public ActionResult PersonalAccount(string error, string nameSubject, string subjectMark, string SubjectSessiom, string dateTime, string auditorium)
 		{
 
 			// Получение куки с именем "Data"
@@ -254,34 +272,34 @@ namespace StudentAssistant.Controllers
 					int countAllLabs = 0;
 					int countAllProtectedLabs = 0;
 					var subjectsList = new List<Subjects>();
+					var subjectsListForMark = new List<Subjects>();
 					var sessionList = new List<Session>();
 					var labsList = new ArrayList();
 					subjectsList = repositoryAuthentication.GetSubjects(id);
+					subjectsListForMark = repositoryAuthentication.GetSubjectsForSession(id);
+
 					foreach (var subject in subjectsList)
 					{
+						sessionList.AddRange(repositoryAuthentication.GetSessions(subject.SubjectId));
 						int countLabs = repositoryAuthentication.GetLabsCount(subject.SubjectId);
 						int countProtectedLabs = repositoryAuthentication.GetProtectedLabsCount(subject.SubjectId);
 						string progressSubject = countProtectedLabs + "/" + countLabs;
 						labsList.Add(progressSubject);
 						countAllLabs += countLabs;
 						countAllProtectedLabs += countProtectedLabs;
-
-
-
-						sessionList = repositoryAuthentication.GetSessions(subject.SubjectId);
-						foreach (var session in sessionList)
+					}
+					foreach (var session in sessionList)
+					{
+						if (session.Type == "Экзамен")
 						{
-							if (session.Type == "Экзамен")
-							{
-								countExam++;
-							}
-							else { countOffset++; }
-							if (session.Mark != 0) { countMark++; }
-							sumMark += session.Mark;
-							if (session.Status == "Не допущен")
-							{
-								Status = false;
-							}
+							countExam++;
+						}
+						else { countOffset++; }
+						if (session.Mark != 0) { countMark++; }
+						sumMark += session.Mark;
+						if (session.Status == "Не допущен")
+						{
+							Status = false;
 						}
 					}
 					double percent = ((double)countAllProtectedLabs / (double)countAllLabs) * 100;
@@ -289,7 +307,6 @@ namespace StudentAssistant.Controllers
 					string formattedPercent = percent.ToString();
 
 					//----------------------------------------------
-
 					if (countMark != 0)
 					{
 						ViewBag.averageMark = sumMark / countMark;
@@ -300,20 +317,47 @@ namespace StudentAssistant.Controllers
 					{
 						ViewBag.Status = "допущен";
 					}
-					else { ViewBag.Status = "не допущен"; }
+					else {
+						ViewBag.Status = "не допущен"; 
+					}
+					if (countAllLabs == 0)
+					{
+						string formatedProgress = "-";
+						ViewBag.formatedProgress = formatedProgress;
+						ViewBag.Status = " ";
+					}
+					else
+					{
+						string formatedProgress = countAllProtectedLabs + "/" + countAllLabs + " (" + formattedPercent + "%)";
+						ViewBag.formatedProgress = formatedProgress;
+					}
 
+					ViewBag.subjectListForMark = subjectsListForMark;
+					ViewBag.checkInput = true;
 					ViewBag.countExam = countExam;
 					ViewBag.countOffset = countOffset;
-					ViewBag.percent = formattedPercent;
 					ViewBag.login = login;
 					ViewBag.subjectList = subjectsList;
+					ViewBag.sessionList = sessionList;
 					ViewBag.labList = labsList;
-					ViewBag.countAllLabs = countAllLabs;
-					ViewBag.countAllProtectedLabs = countAllProtectedLabs;
+					if (error != null && nameSubject != null && subjectMark != null)
+					{
+						ViewBag.Error = error;
+						ViewBag.nameSubject = nameSubject;
+						ViewBag.subjectMark = subjectMark;
+					}
+					if (error != null && SubjectSessiom != null && dateTime != null && auditorium != null)
+					{
+						ViewBag.ErrorSession = error;
+						ViewBag.SubjectSessiom = SubjectSessiom;
+						ViewBag.dateTime = dateTime;
+						ViewBag.auditorium = auditorium;
+					}
 
 				}
 				else if (roleId == "1")
 				{
+					ViewBag.checkInput = true;
 					ViewBag.role = "1";
 					var usersList = new List<Users>();
 					usersList = repositoryAuthentication.GetUsers();
@@ -321,10 +365,116 @@ namespace StudentAssistant.Controllers
 				}
 			}else
 			{
+				ViewBag.checkInput = false;
 				return RedirectToAction("Registration");
 			}
 			return View(this);
 		}
+
+
+		//добавить проверку на допуск в гет
+		public ActionResult PersonalAccountAddMark(string nameSubject, string subjectMark)
+		{
+
+			// Получение куки с именем "Data"
+			var dataCookie = Request.Cookies["Data"];
+
+			if (dataCookie != null)
+			{
+				// Получение значений из куки
+				var id = dataCookie.Values["Id"];
+
+				int Mark = 0;
+
+				try
+				{
+					Mark = Convert.ToInt32(subjectMark);
+					if (Mark >= 1 && Mark <= 10)
+					{	
+					}
+					else
+					{
+						error = "\"Неверный формат оценки";
+						return RedirectToAction("PersonalAccount", "Home", new { error = error, nameSubject = nameSubject, subjectMark = subjectMark });
+					}
+				}
+				catch (FormatException)
+				{
+					ViewBag.Error = "Неверный формат оценки";
+				}
+
+				if (Mark > 0 && Mark <= 10)
+				{
+					Subjects subject = new Subjects();
+					subject = repositoryAuthentication.GetSubjectsByName(id, nameSubject);
+
+					if (subject.SubjectId >= 0)
+					{
+						if (repositoryAuthentication.UpdateMark(Mark, subject.SubjectId) == true)
+						{
+							ViewBag.checkInput = true;
+							return RedirectToAction("PersonalAccount", "Home", new { area = "" });
+						}
+					}
+					else
+					{
+						error = "Произошла ошибка";
+						return RedirectToAction("PersonalAccount", "Home", new { error = error, nameSubject = nameSubject, subjectMark = subjectMark });
+					}
+				}
+				else
+				{
+					error = "Неверный формат оценки";
+				}
+			}
+			return RedirectToAction("PersonalAccount", "Home", new { error = error, nameSubject = nameSubject, subjectMark = subjectMark });
+		}
+
+
+
+
+		//добавить проверку на допуск в гет
+		public ActionResult PersonalAccountUpdateSession(string SubjectSessiom, string dateTime, string auditorium)
+		{
+
+			// Получение куки с именем "Data"
+			var dataCookie = Request.Cookies["Data"];
+
+			if (dataCookie != null)
+			{
+				// Получение значений из куки
+				var id = dataCookie.Values["Id"];
+
+				string format = "dd.MM.yyyy HH:mm";
+				DateTime result;
+
+				if (DateTime.TryParseExact(dateTime, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
+				{
+					Subjects subject = new Subjects();
+					subject = repositoryAuthentication.GetSubjectsByName(id, SubjectSessiom);
+
+					if (subject.SubjectId >= 0)
+					{
+						if (repositoryAuthentication.UpdateSession(dateTime, auditorium, subject.SubjectId) == true)
+						{
+							ViewBag.checkInput = true;
+							return RedirectToAction("PersonalAccount", "Home", new { area = "" });
+						}
+					}
+					else
+					{
+						error = "Произошла ошибка";
+						return RedirectToAction("PersonalAccount", "Home", new { error = error, SubjectSessiom = SubjectSessiom, dateTime = dateTime, auditorium = auditorium });
+					}
+				}
+				else
+				{
+					error = "Неверный формат данных[";
+				}
+			}
+			return RedirectToAction("PersonalAccount", "Home", new { error = error, SubjectSessiom = SubjectSessiom, dateTime = dateTime, auditorium = auditorium });
+		}
+
 
 	}
 }
