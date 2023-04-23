@@ -101,11 +101,11 @@
                                     }
                                 }
                             </tr>
-                         }
+                        }
                     </table>
                 </div>
 
-                                    }
+            }
 
             @if (@ViewBag.role == "1")
             {
@@ -133,65 +133,72 @@
 
         </form>
 
-        <form method="post" action="~/Home/PersonalAccountAddMark">
-            @if (@ViewBag.role == "2")
-            {
-                <div class="block_dropbox_mark">
-                    <p>Предметы</p>
-                    <select class="dropbox" name="nameSubject" id="nameSubject">
-                        @foreach (var subject in ViewBag.subjectListForMark)
-                        {
-                            if (@ViewBag.nameSubject == subject.Name)
+        <div class="wrapper_tables">
+            <form method="post" action="~/Home/PersonalAccountUpdateSession">
+                @if (@ViewBag.role == "2")
+                {
+                    <div class="block_dropbox_session">
+                        <p>Сессия</p>
+                        <select class="dropbox" name="SubjectSessiom" id="SubjectSession">
+                            @foreach (var subject in ViewBag.subjectList)
                             {
-                                <option selected="selected">@subject.Name</option>
+                                if (@ViewBag.SubjectSessiom == subject.Name)
+                                {
+                                    <option selected="selected">@subject.Name</option>
+                                }
+                                else
+                                {
+                                    <option>@subject.Name</option>
+                                }
                             }
-                            else
-                            {
-                                <option>@subject.Name</option>
-                            }
-                        }
-                    </select>
-                    <div class="input_mark_block">
-                        <p class="Mark_text">Оценка</p>
-                        <input id="subjectMark" name="subjectMark" value="@ViewBag.subjectMark" type="number" class="Mark_Input" />
-                        <p style="color: red;">@ViewBag.Error</p>
-                    </div>
-                    <input class="btn btn-oval_cabinet" type="submit" value="Выставить оценку" />
-                </div>
-            }
+                        </select>
 
-        </form>
-        <form method="post" action="~/Home/PersonalAccountUpdateSession">
-            @if (@ViewBag.role == "2")
-            {
-                <div class="block_dropbox_session">
-                    <p>Сессия</p>
-                    <select class="dropbox" name="SubjectSessiom" id="SubjectSession">
-                        @foreach (var subject in ViewBag.subjectList)
-                        {
-                            if (@ViewBag.SubjectSessiom == subject.Name)
-                            {
-                                <option selected="selected">@subject.Name</option>
-                            }
-                            else
-                            {
-                                <option>@subject.Name</option>
-                            }
-                        }
-                    </select>
-
-                    <div class="input_date_block">
-                        <p class="Date_text">Дата</p>
-                        <input id="dateTime" name="dateTime" value="@ViewBag.dateTime" type="text" class="Date_Input" />
-                        <p class="Auditorium_text">Аудитория</p>
-                        <input id="auditorium" name="auditorium" value="@ViewBag.auditorium" type="text" class="Auditorium_Input" />
-                        <p style="color: red;">@ViewBag.ErrorSession</p>
+                        <div class="input_date_block">
+                            <div style="margin-right: 50px">
+                            <p class="Date_text">Дата</p>
+                            <input id="dateTime" name="dateTime" value="@ViewBag.dateTime" type="text" class="Date_Input" />
+                            </div>
+                            <div>
+                            <p class="Auditorium_text">Аудитория</p>
+                            <input id="auditorium" name="auditorium" value="@ViewBag.auditorium" type="text" class="Auditorium_Input" />
+                            </div>
+                            <p style="color: red;">@ViewBag.ErrorSession</p>
+                        </div>
+                        <input class="btn btn-oval_cabinet" type="submit" value="Добавить" />
                     </div>
-                    <input class="btn btn-oval_cabinet" type="submit" value="Добавить" />
-                </div>
-            }
-        </form>
-            
+                }
+            </form>
+
+            <form method="post" action="~/Home/PersonalAccountAddMark">
+                @if (@ViewBag.role == "2")
+                {
+                    <div class="block_dropbox_mark">
+                        <p>Предметы</p>
+                        <select class="dropbox" name="nameSubject" id="nameSubject">
+                            @foreach (var subject in ViewBag.subjectListForMark)
+                            {
+                                if (@ViewBag.nameSubject == subject.Name)
+                                {
+                                    <option selected="selected">@subject.Name</option>
+                                }
+                                else
+                                {
+                                    <option>@subject.Name</option>
+                                }
+                            }
+                        </select>
+                        <div class="input_mark_block">
+                            <p class="Mark_text">Оценка</p>
+                            <input id="subjectMark" name="subjectMark" value="@ViewBag.subjectMark" type="number" class="Mark_Input" />
+                            <p style="color: red;">@ViewBag.Error</p>
+                        </div>
+                        <input class="btn btn-oval_cabinet" type="submit" value="Выставить оценку" />
+                    </div>
+                }
+
+            </form>
+        </div>
+
 
     </div>
 </main>

@@ -115,13 +115,20 @@ body {
         }
 
 
-/* задаем footer */
+/* задаем footer wrapper_fotter */
+.footer_links {
+    display: flex;
+    margin-left: 10rem;
+}
 
-#footer {
+.footer {
     background-color: #2c3e50;
     color: #fff;
-    padding: 50px;
-    text-align: center;
+    height: 20vh;
+    font-size: 1.15rem;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 /* задаем блоки на главной странице */
@@ -161,6 +168,7 @@ body {
 }
 /*регистрация и авторизация*/
 .main_content {
+    min-height: calc(100vh - 80px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -249,12 +257,15 @@ body {
     margin-bottom: 25px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: 85%;
     display: block;
 }
 
     .StatisticsTable td:first-child {
-        width: 100%;
+        width: 75%;
+    }.input_date_block
+    .StatisticsTable td:nth-child(2) {
+       text-align: center;
     }
 
 .AdminTable {
@@ -310,11 +321,7 @@ table {
         background-color: #f5f5f5;
     }
 
-.main_content {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
-}
+
 
 .block_main_account {
     display: flex;
@@ -329,6 +336,10 @@ table {
 
 /*////////////////////////////////////*/
 
+.wrapper_tables {
+    margin-left: 5rem;
+}
+
 .block_dropbox_mark {
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -337,7 +348,7 @@ table {
     margin-bottom: 25px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: 70%;
     display: block;
 }
 
@@ -383,11 +394,11 @@ table {
     border: 1px solid #ccc;
     border-radius: 10px;
     padding: 12px;
-    margin-top: 25px;
+    margin-top: 0;
     margin-bottom: 25px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: 70%;
     display: block;
 }
 
