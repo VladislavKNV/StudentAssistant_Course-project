@@ -372,7 +372,7 @@ namespace StudentAssistant.Controllers
 		}
 
 
-		//добавить проверку на допуск в гет
+		//добавить проверку на допуск в гет PersonalAccountAdmin
 		public ActionResult PersonalAccountAddMark(string nameSubject, string subjectMark)
 		{
 
@@ -432,8 +432,6 @@ namespace StudentAssistant.Controllers
 
 
 
-
-		//добавить проверку на допуск в гет
 		public ActionResult PersonalAccountUpdateSession(string SubjectSessiom, string dateTime, string auditorium)
 		{
 
@@ -460,6 +458,11 @@ namespace StudentAssistant.Controllers
 							ViewBag.checkInput = true;
 							return RedirectToAction("PersonalAccount", "Home", new { area = "" });
 						}
+						else
+						{
+							error = "Произошла ошибка";
+							return RedirectToAction("PersonalAccount", "Home", new { error = error, SubjectSessiom = SubjectSessiom, dateTime = dateTime, auditorium = auditorium });
+						}
 					}
 					else
 					{
@@ -473,6 +476,99 @@ namespace StudentAssistant.Controllers
 				}
 			}
 			return RedirectToAction("PersonalAccount", "Home", new { error = error, SubjectSessiom = SubjectSessiom, dateTime = dateTime, auditorium = auditorium });
+		}
+
+
+
+
+		public ActionResult PersonalAccountAdminDel(string SelectedItem)
+		{
+			// Получение куки с именем "Data"
+			var dataCookie = Request.Cookies["Data"];
+
+			if (dataCookie != null)
+			{
+				// Получение значений из куки
+				int id = Convert.ToInt32(dataCookie.Values["Id"]);
+
+
+				int IdDel = Convert.ToInt32(SelectedItem);
+				if (id != IdDel)
+				{
+					if (repositoryAuthentication.Delete(IdDel) == true)
+					{
+						return RedirectToAction("PersonalAccount", "Home", new { });
+					}
+					else
+					{
+						//тут будет ошибка
+						return RedirectToAction("PersonalAccount", "Home", new { });
+					}
+				}
+			} else
+			{
+				//тут будет ошибка
+				return RedirectToAction("PersonalAccount", "Home", new { });
+			}
+			return RedirectToAction("PersonalAccount", "Home", new {});
+		}
+
+		public ActionResult PersonalAccountAdminRole(string SelectedItem2)
+		{
+			// Получение куки с именем "Data"
+			var dataCookie = Request.Cookies["Data"];
+
+			if (dataCookie != null)
+			{
+				// Получение значений из куки
+				int id = Convert.ToInt32(dataCookie.Values["Id"]);
+
+				if (SelectedItem2 == "" || SelectedItem2 == null)
+				{
+					//error
+				}
+				else
+				{
+					int IdUser = Convert.ToInt32(SelectedItem2);//добавить ошибку если ничего не выбрано
+
+					if (id != IdUser)
+					{
+						Users user = new Users();
+						user = repositoryAuthentication.GetUserById(IdUser);
+
+						if (user.RoleId == 2)
+						{
+							if (repositoryAuthentication.UpdateUser(IdUser, 1) == true)
+							{
+								return RedirectToAction("PersonalAccount", "Home", new { });
+							}
+							else
+							{
+								//тут будет ошибка
+								return RedirectToAction("PersonalAccount", "Home", new { });
+							}
+						}
+						else if (user.RoleId == 1)
+						{
+							if (repositoryAuthentication.UpdateUser(IdUser, 2) == true)
+							{
+								return RedirectToAction("PersonalAccount", "Home", new { });
+							}
+							else
+							{
+								//тут будет ошибка
+								return RedirectToAction("PersonalAccount", "Home", new { });
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				//тут будет ошибка
+				return RedirectToAction("PersonalAccount", "Home", new { });
+			}
+			return RedirectToAction("PersonalAccount", "Home", new { });
 		}
 
 

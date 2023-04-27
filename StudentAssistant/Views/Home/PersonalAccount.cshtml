@@ -5,200 +5,238 @@
 <main class="block_main_account">
     <div class="main_content">
 
-        <form method="get" action="~/Home/PersonalAccount">
+        <div class="content_top">
 
-            @if (@ViewBag.role == "2")
-            {
-                <div class="StatisticsTable">
-                    <table>
-                        <tr>
-                            <td>@ViewBag.login</td>
-                            <td>@ViewBag.Status</td>
-                        </tr>
-                        <tr>
-                            <td>Предметы:</td>
-                            <td></td>
-                        </tr>
-                        @{
-                            int i = 0;
-                        }
-                        @foreach (var subject in ViewBag.subjectList)
-                        {
-                            <tr>
-                                <td> &nbsp;&nbsp;&nbsp;&#x25CB; @subject.Name</td>
-                                <td>@ViewBag.labList[i]</td>
-                            </tr>
-                            i++;
-                        }
-                        <tr>
-                            <td>Прогресс</td>
-                            <td>@ViewBag.formatedProgress</td>
-                        </tr>
-                        <tr>
-                            <td>Количество экзаменов</td>
-                            <td>@ViewBag.countExam</td>
-                        </tr>
-                        <tr>
-                            <td>Количество зачетов</td>
-                            <td>@ViewBag.countOffset</td>
-                        </tr>
-                        <tr>
-                            <td>Средний балл</td>
-                            <td>@ViewBag.averageMark</td>
-                        </tr>
-                    </table>
-                </div>
+            <div class="statistics_table_content">
+                <form method="get" action="~/Home/PersonalAccount">
+                    <!--форма 1-->
 
-
-
-                <div>
-                    <!--ListSession-->
-                    <table class="sessionTable">
-                        <caption>Расписание Сессии</caption>
-                        <tr>
-                            <th>Предмет</th>
-                            <th>Тип</th>
-                            <th>Статус</th>
-                            <th>Оценка</th>
-                            <th>Дата сдачи</th>
-                            <th>Аудитория</th>
-                        </tr>
-                        @foreach (var item in ViewBag.sessionList)
-                        {
-                            <tr>
+                    @if (@ViewBag.role == "2")
+                    {
+                        <div class="StatisticsTable">
+                            <table>
+                                <tr>
+                                    <td>@ViewBag.login</td>
+                                    <td>@ViewBag.Status</td>
+                                </tr>
+                                <tr>
+                                    <td>Предметы:</td>
+                                    <td></td>
+                                </tr>
+                                @{
+                                    int i = 0;
+                                }
                                 @foreach (var subject in ViewBag.subjectList)
                                 {
-                                    if (item.SubjectId == subject.SubjectId)
-                                    {
-                                        <td>@subject.Name</td>
-                                    }
+                                    <tr>
+                                        <td> &nbsp;&nbsp;&nbsp;&#x25CB; @subject.Name</td>
+                                        <td>@ViewBag.labList[i]</td>
+                                    </tr>
+                                    i++;
                                 }
-                                <td>@item.Type</td>
-                                <td>@item.Status</td>
-                                @{ if (item.Mark == 0)
-                                    {
-                                        <td>-</td>
-                                    }
-                                    else
-                                    {
-                                        <td>@item.Mark</td>
-                                    }
-                                    if (item.DateTime == null)
-                                    {
-                                        <td>-</td>
-                                    }
-                                    else
-                                    {
-                                        <td>@item.DateTime</td>
-                                    }
-                                    if (item.Auditorium == null)
-                                    {
-                                        <td>-</td>
-                                    }
-                                    else
-                                    {
-                                        <td>@item.Auditorium</td>
-                                    }
-                                }
-                            </tr>
-                        }
-                    </table>
-                </div>
-
-            }
-
-            @if (@ViewBag.role == "1")
-            {
-                <div class="AdminTable">
-                    <table>
-                        <tr>
-                            <th>Id</th>
-                            <th>Role</th>
-                            <th>Login</th>
-                            <th>Email</th>
-                        </tr>
-                        @foreach (var user in ViewBag.usersList)
-                        {
-                            <tr>
-                                <td>@user.id</td>
-                                <td>@user.RoleId</td>
-                                <td>@user.Login</td>
-                                <td>@user.Email</td>
-                            </tr>
-                        }
-                    </table>
-                </div>
-            }
-
-
-        </form>
-
-        <div class="wrapper_tables">
-            <form method="post" action="~/Home/PersonalAccountUpdateSession">
-                @if (@ViewBag.role == "2")
-                {
-                    <div class="block_dropbox_session">
-                        <p>Сессия</p>
-                        <select class="dropbox" name="SubjectSessiom" id="SubjectSession">
-                            @foreach (var subject in ViewBag.subjectList)
-                            {
-                                if (@ViewBag.SubjectSessiom == subject.Name)
-                                {
-                                    <option selected="selected">@subject.Name</option>
-                                }
-                                else
-                                {
-                                    <option>@subject.Name</option>
-                                }
-                            }
-                        </select>
-
-                        <div class="input_date_block">
-                            <div style="margin-right: 50px">
-                            <p class="Date_text">Дата</p>
-                            <input id="dateTime" name="dateTime" value="@ViewBag.dateTime" type="text" class="Date_Input" />
-                            </div>
-                            <div>
-                            <p class="Auditorium_text">Аудитория</p>
-                            <input id="auditorium" name="auditorium" value="@ViewBag.auditorium" type="text" class="Auditorium_Input" />
-                            </div>
-                            <p style="color: red;">@ViewBag.ErrorSession</p>
+                                <tr>
+                                    <td>Прогресс</td>
+                                    <td>@ViewBag.formatedProgress</td>
+                                </tr>
+                                <tr>
+                                    <td>Количество экзаменов</td>
+                                    <td>@ViewBag.countExam</td>
+                                </tr>
+                                <tr>
+                                    <td>Количество зачетов</td>
+                                    <td>@ViewBag.countOffset</td>
+                                </tr>
+                                <tr>
+                                    <td>Средний балл</td>
+                                    <td>@ViewBag.averageMark</td>
+                                </tr>
+                            </table>
                         </div>
-                        <input class="btn btn-oval_cabinet" type="submit" value="Добавить" />
-                    </div>
-                }
-            </form>
+                    }
+                </form>
+            </div>
 
-            <form method="post" action="~/Home/PersonalAccountAddMark">
-                @if (@ViewBag.role == "2")
-                {
-                    <div class="block_dropbox_mark">
-                        <p>Предметы</p>
-                        <select class="dropbox" name="nameSubject" id="nameSubject">
-                            @foreach (var subject in ViewBag.subjectListForMark)
-                            {
-                                if (@ViewBag.nameSubject == subject.Name)
+            <div class="add_data_content">
+
+                <form method="post" action="~/Home/PersonalAccountUpdateSession">
+                    <!--форма 2-->
+                    @if (@ViewBag.role == "2")
+                    {
+                        <div class="block_dropbox_session">
+                            <p>Сессия</p>
+                            <select class="dropbox" name="SubjectSessiom" id="SubjectSession">
+                                @foreach (var subject in ViewBag.subjectList)
                                 {
-                                    <option selected="selected">@subject.Name</option>
+                                    if (@ViewBag.SubjectSessiom == subject.Name)
+                                    {
+                                        <option selected="selected">@subject.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option>@subject.Name</option>
+                                    }
                                 }
-                                else
-                                {
-                                    <option>@subject.Name</option>
-                                }
-                            }
-                        </select>
-                        <div class="input_mark_block">
-                            <p class="Mark_text">Оценка</p>
-                            <input id="subjectMark" name="subjectMark" value="@ViewBag.subjectMark" type="number" class="Mark_Input" />
-                            <p style="color: red;">@ViewBag.Error</p>
+                            </select>
+
+                            <div class="input_date_block">
+                                <div style="margin-right: 50px">
+                                    <p class="Date_text">Дата</p>
+                                    <input id="dateTime" name="dateTime" value="@ViewBag.dateTime" type="text" class="Date_Input" />
+                                </div>
+                                <div>
+                                    <p class="Auditorium_text">Аудитория</p>
+                                    <input id="auditorium" name="auditorium" value="@ViewBag.auditorium" type="text" class="Auditorium_Input" />
+                                </div>
+                                <p style="color: red;">@ViewBag.ErrorSession</p>
+                            </div>
+                            <input class="btn btn-oval_cabinet" type="submit" value="Добавить" />
                         </div>
-                        <input class="btn btn-oval_cabinet" type="submit" value="Выставить оценку" />
-                    </div>
-                }
+                    }
+                </form>
 
-            </form>
+                <form method="post" action="~/Home/PersonalAccountAddMark">
+                    <!--форма 3-->
+                    @if (@ViewBag.role == "2")
+                    {
+                        <div class="block_dropbox_mark">
+                            <p>Предметы</p>
+                            <select class="dropbox" name="nameSubject" id="nameSubject">
+                                @foreach (var subject in ViewBag.subjectListForMark)
+                                {
+                                    if (@ViewBag.nameSubject == subject.Name)
+                                    {
+                                        <option selected="selected">@subject.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option>@subject.Name</option>
+                                    }
+                                }
+                            </select>
+                            <div class="input_mark_block">
+                                <p class="Mark_text">Оценка</p>
+                                <input id="subjectMark" name="subjectMark" value="@ViewBag.subjectMark" type="number" class="Mark_Input" />
+                                <p style="color: red;">@ViewBag.Error</p>
+                            </div>
+                            <input class="btn btn-oval_cabinet" type="submit" value="Выставить оценку" />
+                        </div>
+                    }
+
+                </form>
+            </div>
         </div>
 
+        <div class="session_table_content">
 
+            <form method="get" action="~/Home/PersonalAccount">
+                <!--форма 4-->
+                @if (@ViewBag.role == "2")
+                { 
+                    <div>
+                        <!--ListSession-->
+                        <table class="sessionTable">
+                            <caption>Расписание Сессии</caption>
+                            <tr>
+                                <th>Предмет</th>
+                                <th>Тип</th>
+                                <th>Статус</th>
+                                <th>Оценка</th>
+                                <th>Дата сдачи</th>
+                                <th>Аудитория</th>
+                            </tr>
+                            @foreach (var item in ViewBag.sessionList)
+                            {
+                                <tr>
+                                    @foreach (var subject in ViewBag.subjectList)
+                                    {
+                                        if (item.SubjectId == subject.SubjectId)
+                                        {
+                                            <td>@subject.Name</td>
+                                        }
+                                    }
+                                    <td>@item.Type</td>
+                                    <td>@item.Status</td>
+                                    @{ if (item.Mark == 0)
+                                        {
+                                            <td>-</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@item.Mark</td>
+                                        }
+                                        if (item.DateTime == null)
+                                        {
+                                            <td>-</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@item.DateTime</td>
+                                        }
+                                        if (item.Auditorium == null)
+                                        {
+                                            <td>-</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@item.Auditorium</td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                }
+
+                </form>
+        </div>
+        <div>
+
+                <!--форма 5-->
+                @if (@ViewBag.role == "1")
+                {
+                    <div class="AdminTable">
+                        <table>
+                            <tr>
+                                <th>Id</th>
+                                <th>Role</th>
+                                <th>Login</th>
+                                <th>Email</th>
+                            </tr>
+                            @foreach (var user in ViewBag.usersList)
+                            {
+                                <tr>
+                                    <td>@user.id</td>
+                                    <td>@user.RoleId</td>
+                                    <td>@user.Login</td>
+                                    <td>@user.Email</td>
+                                    <td><input type="radio" name="rad" id="@user.id" onchange="change()" /></td>
+                                </tr>
+                            }
+                        </table>
+                        <form method="get" action="~/Home/PersonalAccountAdminDel">
+                            <input class="btn btn-oval_adm" type="submit" value="Удалить" />
+                            <input type="hidden" id="SelectedItem" name="SelectedItem" value="" />
+                        </form>
+                        <form method="get" action="~/Home/PersonalAccountAdminRole">
+                            <input class="btn btn-oval_adm" type="submit" value="Изменить роль" />
+                            <input type="hidden" id="SelectedItem2" name="SelectedItem2" value="" />
+                        </form>
+                    </div>
+                 }
+        </div>
     </div>
 </main>
+
+<script>
+    function change() {
+        let elem = document.getElementsByName('rad');
+        let del = document.getElementsByName('SelectedItem')
+        elem.forEach(item => {
+            if (item.checked) {
+                del[0].value = item.id;
+                let del2 = document.getElementsByName('SelectedItem2');
+                del2[0].value = item.id;
+            }
+        });
+    }
+</script>

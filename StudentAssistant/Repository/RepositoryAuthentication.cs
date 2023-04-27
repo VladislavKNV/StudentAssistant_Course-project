@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.UI.WebControls;
 
 namespace StudentAssistant.Repository
@@ -186,6 +187,47 @@ namespace StudentAssistant.Repository
 			}
 			return usersList;
 		}
+
+		public Users GetUserById(int id)
+		{
+			Users user = null;
+			var queryString = "select top 1 id,RoleId,Login,Email,Password from Users where id=@id";//sql запрос
+
+			// Создание и открытие соединения в блоке using.
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", id);
+				// Создание объеков команд и параметров.
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					if (reader.Read())
+					{
+						object dbVal = null;
+
+						user = new Users();
+						user.id = (int)reader.GetValue(0);
+						user.RoleId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							user.Login = (dbVal as string).Trim();
+						}
+
+						dbVal = (string)reader.GetValue(3);
+						if (!(dbVal is DBNull))
+						{
+							user.Email = (dbVal as string).Trim();
+						}
+					}
+				}
+				return user;
+			}
+		}
+
 
 		public List<Subjects> GetSubjects(string userId)
 		{
@@ -453,6 +495,41 @@ namespace StudentAssistant.Repository
 			{
 				return false;
 			}
+		}
+
+		public bool UpdateUser(int id, int RoleId)
+		{
+			var queryString = "Update Users Set RoleId = @RoleId where id = @id";
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+
+				// Create the Command and Parameter objects.
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", id);
+				command.Parameters.AddWithValue("@RoleId", RoleId);
+
+				connection.Open();
+				var reader = command.ExecuteReader();
+				reader.Read();
+
+			}
+			return true;
+		}
+			
+
+		public bool Delete(int userId)
+		{
+			var queryString = " Delete from Users where id = @id";//sql запрос
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				// Create the Command and Parameter objects.
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", userId);
+				connection.Open();
+				var reader = command.ExecuteReader();
+				reader.Read();
+			}
+			return true;
 		}
 
 	}
