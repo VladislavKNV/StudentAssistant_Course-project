@@ -189,30 +189,47 @@
 
                 </form>
         </div>
-        <div>
 
-                <!--форма 5-->
-                @if (@ViewBag.role == "1")
-                {
-                    <div class="AdminTable">
-                        <table>
+        <div class="AdminnContent">
+            <!--форма 5-->
+            @if (@ViewBag.role == "1")
+            {
+                <div class="AdminTable">
+                    @if (ViewBag.Error != null)
+                    {
+                        <p style="color: red; font-size: 1.2rem; text-align: center;">@ViewBag.Error</p>
+                    }
+                    else
+                    {
+                        <p style="color: white; font-size: 1.2rem; text-align: center;">_</p>
+                    }
+                    <table>
+                        <tr>
+                            <th>Id</th>
+                            <th>Role</th>
+                            <th>Login</th>
+                            <th>Email</th>
+                            <th> </th>
+                        </tr>
+                        @foreach (var user in ViewBag.usersList)
+                        {
                             <tr>
-                                <th>Id</th>
-                                <th>Role</th>
-                                <th>Login</th>
-                                <th>Email</th>
+                                <td>@user.id</td>
+                                @if (user.RoleId == 1)
+                                {
+                                    <td class="td_role">admin</td>
+                                }
+                                else
+                                {
+                                    <td class="td_role">user</td>
+                                }
+                                <td>@user.Login</td>
+                                <td>@user.Email</td>
+                                <td><input type="radio" name="rad" id="@user.id" onchange="change()" /></td>
                             </tr>
-                            @foreach (var user in ViewBag.usersList)
-                            {
-                                <tr>
-                                    <td>@user.id</td>
-                                    <td>@user.RoleId</td>
-                                    <td>@user.Login</td>
-                                    <td>@user.Email</td>
-                                    <td><input type="radio" name="rad" id="@user.id" onchange="change()" /></td>
-                                </tr>
-                            }
-                        </table>
+                        }
+                    </table>
+                    <div class="button_div">
                         <form method="get" action="~/Home/PersonalAccountAdminDel">
                             <input class="btn btn-oval_adm" type="submit" value="Удалить" />
                             <input type="hidden" id="SelectedItem" name="SelectedItem" value="" />
@@ -222,7 +239,8 @@
                             <input type="hidden" id="SelectedItem2" name="SelectedItem2" value="" />
                         </form>
                     </div>
-                 }
+                </div>
+             }
         </div>
     </div>
 </main>

@@ -133,8 +133,10 @@
     <Compile Include="Repository\RepositoryAuthentication.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Images\AAA.jpg" />
     <Content Include="Content\Images\facebook.svg" />
     <Content Include="Content\Images\logo.jpeg" />
+    <Content Include="Content\Images\Slider_1_test_2.png" />
     <Content Include="Content\Images\telegram.svg" />
     <Content Include="Content\Images\twitter.svg" />
     <Content Include="Content\Styles\MainStyles.css" />

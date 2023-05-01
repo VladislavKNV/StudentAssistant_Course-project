@@ -362,6 +362,7 @@ namespace StudentAssistant.Controllers
 					var usersList = new List<Users>();
 					usersList = repositoryAuthentication.GetUsers();
 					ViewBag.usersList = usersList;
+					ViewBag.Error = error;
 				}
 			}else
 			{
@@ -472,7 +473,7 @@ namespace StudentAssistant.Controllers
 				}
 				else
 				{
-					error = "Неверный формат данных[";
+					error = "Неверный формат данных";
 				}
 			}
 			return RedirectToAction("PersonalAccount", "Home", new { error = error, SubjectSessiom = SubjectSessiom, dateTime = dateTime, auditorium = auditorium });
@@ -490,9 +491,16 @@ namespace StudentAssistant.Controllers
 			{
 				// Получение значений из куки
 				int id = Convert.ToInt32(dataCookie.Values["Id"]);
-
-
-				int IdDel = Convert.ToInt32(SelectedItem);
+				int IdDel;
+				if (SelectedItem != "")
+				{
+					IdDel = Convert.ToInt32(SelectedItem);
+				}
+				else
+				{
+					error = "Вы никого не выбрали";
+					return RedirectToAction("PersonalAccount", "Home", new { error = error });
+				}
 				if (id != IdDel)
 				{
 					if (repositoryAuthentication.Delete(IdDel) == true)
@@ -501,16 +509,20 @@ namespace StudentAssistant.Controllers
 					}
 					else
 					{
-						//тут будет ошибка
-						return RedirectToAction("PersonalAccount", "Home", new { });
+						error = "Произошла ошибка";
+						return RedirectToAction("PersonalAccount", "Home", new { error = error });
 					}
+				}
+				else
+				{
+					error = "Вы не можете удалить себя";
+					return RedirectToAction("PersonalAccount", "Home", new { error = error });
 				}
 			} else
 			{
-				//тут будет ошибка
-				return RedirectToAction("PersonalAccount", "Home", new { });
+				error = "Произошла ошибка";
+				return RedirectToAction("PersonalAccount", "Home", new { error = error });
 			}
-			return RedirectToAction("PersonalAccount", "Home", new {});
 		}
 
 		public ActionResult PersonalAccountAdminRole(string SelectedItem2)
@@ -520,12 +532,12 @@ namespace StudentAssistant.Controllers
 
 			if (dataCookie != null)
 			{
-				// Получение значений из куки
 				int id = Convert.ToInt32(dataCookie.Values["Id"]);
 
 				if (SelectedItem2 == "" || SelectedItem2 == null)
 				{
-					//error
+					error = "Вы никого не выбрали";
+					return RedirectToAction("PersonalAccount", "Home", new { error = error });
 				}
 				else
 				{
@@ -544,8 +556,8 @@ namespace StudentAssistant.Controllers
 							}
 							else
 							{
-								//тут будет ошибка
-								return RedirectToAction("PersonalAccount", "Home", new { });
+								error = "Произошла ошибка";
+								return RedirectToAction("PersonalAccount", "Home", new { error = error });
 							}
 						}
 						else if (user.RoleId == 1)
@@ -556,17 +568,22 @@ namespace StudentAssistant.Controllers
 							}
 							else
 							{
-								//тут будет ошибка
-								return RedirectToAction("PersonalAccount", "Home", new { });
+								error = "Произошла ошибка";
+								return RedirectToAction("PersonalAccount", "Home", new { error = error });
 							}
 						}
+					}
+					else
+					{
+						error = "Вы не можете изменить роль у себя";
+						return RedirectToAction("PersonalAccount", "Home", new { error = error });
 					}
 				}
 			}
 			else
 			{
-				//тут будет ошибка
-				return RedirectToAction("PersonalAccount", "Home", new { });
+				error = "Произошла ошибка";
+				return RedirectToAction("PersonalAccount", "Home", new { error = error });
 			}
 			return RedirectToAction("PersonalAccount", "Home", new { });
 		}
