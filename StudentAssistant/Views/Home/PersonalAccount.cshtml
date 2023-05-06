@@ -3,7 +3,7 @@
 }
 
 <main class="block_main_account">
-    <div class="main_content">
+    <div class="main_content2">
 
         <div class="content_top">
 
@@ -131,11 +131,10 @@
             <form method="get" action="~/Home/PersonalAccount">
                 <!--форма 4-->
                 @if (@ViewBag.role == "2")
-                { 
+                {
                     <div>
                         <!--ListSession-->
                         <table class="sessionTable">
-                            <caption>Расписание Сессии</caption>
                             <tr>
                                 <th>Предмет</th>
                                 <th>Тип</th>
@@ -187,9 +186,11 @@
                     </div>
                 }
 
-                </form>
+            </form>
         </div>
 
+    </div>
+    <div class="main_content3">
         <div class="AdminnContent">
             <!--форма 5-->
             @if (@ViewBag.role == "1")
@@ -240,9 +241,9 @@
                         </form>
                     </div>
                 </div>
-             }
+            }
         </div>
-    </div>
+    <</div>
 </main>
 
 <script>

@@ -14,6 +14,11 @@ public class UserModel {
         this.password = password;
     }
 
+    public UserModel(String login, String password) {
+        this.login = login;
+        this.password = password;
+    }
+
     public int getId() {return id;}
     public int getIdRole() {return id_role;}
     public String getLogin() {return login;}

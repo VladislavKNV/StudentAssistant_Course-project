@@ -503,7 +503,7 @@ namespace StudentAssistant.Controllers
 				}
 				if (id != IdDel)
 				{
-					if (repositoryAuthentication.Delete(IdDel) == true)
+					if (repositoryAuthentication.DeleteUser(IdDel) == true)
 					{
 						return RedirectToAction("PersonalAccount", "Home", new { });
 					}

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.studentassistant.DataBase.DbHelper;
 import com.example.studentassistant.DataBase.DbUser;
+import com.example.studentassistant.Helpers.Hash;
 import com.example.studentassistant.Model.UserModel;
 import com.example.studentassistant.R;
 import com.google.android.material.textfield.TextInputEditText;
@@ -84,7 +85,7 @@ public class Registration extends AppCompatActivity {
                 isPasswordValid(edtRegistrationPassword1.getText().toString(), edtRegistrationPassword2.getText().toString())) {
 
             try {
-                UserModel userModel = new UserModel(1, edtRegistrationLogin.getText().toString(), edtRegistrationEmail.getText().toString(), edtRegistrationPassword1.getText().toString());
+                UserModel userModel = new UserModel(1, edtRegistrationLogin.getText().toString(), edtRegistrationEmail.getText().toString(), Hash.GetHash(edtRegistrationPassword1.getText().toString()));
                 if(DbUser.add(db, userModel) != -1) {
                     Toast.makeText(this, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(this, MainActivity.class);

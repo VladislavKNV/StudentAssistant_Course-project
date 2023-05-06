@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Helpers;
+using System.Web.Security;
 using System.Web.UI.WebControls;
 
 namespace StudentAssistant.Repository
@@ -151,11 +152,9 @@ namespace StudentAssistant.Repository
 			var usersList = new List<Users>();
 			var queryString = "select id,RoleId,Login,Email from Users";
 
-			// Создание и открытие соединения в блоке using.
 			using (var connection = new SqlConnection(connectionString))
 			{
 				var command = new SqlCommand(queryString, connection);
-				// Создание объеков команд и параметров.
 				connection.Open();
 
 				using (var reader = command.ExecuteReader())
@@ -307,7 +306,7 @@ namespace StudentAssistant.Repository
 
 		public Subjects GetSubjectsByName(string userId, string name)
 		{
-			Subjects subject = new Subjects();
+			Subjects subject = null;
 			var queryString = "select id, UserId, Name from Subjects where UserId=@UserId and Name = @Name";
 
 			using (var connection = new SqlConnection(connectionString))
@@ -322,6 +321,7 @@ namespace StudentAssistant.Repository
 				{
 					while (reader.Read())
 					{
+						subject= new Subjects();
 						object dbVal = null;
 
 						subject.SubjectId = (int)reader.GetValue(0);
@@ -338,6 +338,78 @@ namespace StudentAssistant.Repository
 			}
 
 			return subject;
+		}
+
+		public bool SubjectExists(int subjectId)
+		{
+			var queryString = "select count(*) from Subjects where id=@SubjectId";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", subjectId);
+
+				connection.Open();
+
+				var count = (int)command.ExecuteScalar();
+
+				return count > 0;
+			}
+		}
+
+
+		public List<Labs> GetLabs(int subjectsId)
+		{
+			var labsList = new List<Labs>();
+			var queryString = "select id, SubjectId, LabProtected from Labs where SubjectId=@SubjectId";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", subjectsId);
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var lab = new Labs();
+						lab.LabsId = (int)reader.GetValue(0);
+						lab.SubjectsId = (int)reader.GetValue(1);
+						lab.LabProtected = (int)reader.GetValue(2);
+
+						labsList.Add(lab);
+					}
+				}
+			}
+
+			return labsList;
+		}
+
+		public Labs GetLab(int labId)
+		{
+			Labs lab = null;
+			var queryString = "select id, SubjectId, LabProtected from Labs where id=@labId";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@labId", labId);
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						lab = new Labs();
+						lab.LabsId = (int)reader.GetValue(0);
+						lab.SubjectsId = (int)reader.GetValue(1);
+						lab.LabProtected = (int)reader.GetValue(2);
+					}
+				}
+			}
+
+			return lab;
 		}
 
 		public int GetLabsCount(int subjectsId)
@@ -517,7 +589,7 @@ namespace StudentAssistant.Repository
 		}
 			
 
-		public bool Delete(int userId)
+		public bool DeleteUser(int userId)
 		{
 			var queryString = " Delete from Users where id = @id";//sql запрос
 			using (SqlConnection connection = new SqlConnection(connectionString))
@@ -525,6 +597,136 @@ namespace StudentAssistant.Repository
 				// Create the Command and Parameter objects.
 				var command = new SqlCommand(queryString, connection);
 				command.Parameters.AddWithValue("@id", userId);
+				connection.Open();
+				var reader = command.ExecuteReader();
+				reader.Read();
+			}
+			return true;
+		}
+
+
+		///for Rest Api ///////////////
+
+		public bool AddSubject(Subjects subject)
+		{
+			var queryString = "INSERT INTO Subjects (UserId, Name) VALUES (@UserId, @Name)";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@UserId", subject.UserId);
+				command.Parameters.AddWithValue("@Name", subject.Name);
+
+				connection.Open();
+
+				command.ExecuteNonQuery();
+			}
+			return true;
+		}
+
+		public int AddLab(Labs labs)
+		{
+			var queryString = "INSERT INTO Labs (SubjectId, LabProtected) OUTPUT INSERTED.Id VALUES (@SubjectId, @LabProtected)";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", labs.SubjectsId);
+				command.Parameters.AddWithValue("@LabProtected", labs.LabProtected);
+
+				connection.Open();
+
+				var result = command.ExecuteScalar();
+				if (result == null)
+				{
+					return -1;
+				}
+
+				return (int)result;
+			}
+		}
+
+		public int AddLabs(int SubjectsId)
+		{
+			var queryString = "INSERT INTO Labs (SubjectId, LabProtected) OUTPUT INSERTED.Id VALUES (@SubjectId, @LabProtected)";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", SubjectsId);
+				command.Parameters.AddWithValue("@LabProtected", 0);
+
+				connection.Open();
+
+				var result = command.ExecuteScalar();
+				if (result == null)
+				{
+					return -1;
+				}
+
+				return (int)result;
+			}
+		}
+
+		public bool UpdateLabs(Labs labs)
+		{
+			var queryString = "Update Labs Set LabProtected = @LabProtected where id = @id";
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+
+				// Create the Command and Parameter objects.
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", labs.LabsId);
+				command.Parameters.AddWithValue("@LabProtected", labs.LabProtected);
+
+				connection.Open();
+				var reader = command.ExecuteReader();
+				reader.Read();
+
+			}
+			return true;
+		}
+
+		public bool UpdateSubjects(Subjects subjects)
+		{
+			var queryString = "Update Subjects Set Name = @Name where id = @id";
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", subjects.SubjectId);
+				command.Parameters.AddWithValue("@Name", subjects.Name);
+
+				connection.Open();
+				var reader = command.ExecuteReader();
+				reader.Read();
+
+			}
+			return true;
+		}
+
+
+		public bool DeleteSubject(int subjectId)
+		{
+			var queryString = " Delete from Subjects where id = @id";
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", subjectId);
+				connection.Open();
+				var reader = command.ExecuteReader();
+				reader.Read();
+			}
+			return true;
+		}
+
+		public bool DeleteLab(int labId)
+		{
+			var queryString = " Delete from Labs where id = @id";
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", labId);
 				connection.Open();
 				var reader = command.ExecuteReader();
 				reader.Read();

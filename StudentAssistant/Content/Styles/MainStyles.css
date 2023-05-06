@@ -250,9 +250,24 @@ body {
 .block_main_account {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .main_content {
+    display: flex;
+    margin-top: 4rem;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main_content2 {
+    display: flex;
+    margin-top: 4rem;
+    width: 65%;
+    flex-direction: column;
+}
+
+.main_content3 {
     display: flex;
     margin-top: 4rem;
     flex-direction: column;
@@ -263,9 +278,10 @@ body {
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    justify-content: center;
     align-content: stretch;
     flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
 }
 
 .statistics_table_content {
@@ -277,16 +293,18 @@ body {
 
 .add_data_content {
     margin-bottom: 1rem;
-    margin-left: 10rem;
+    margin-left: 12rem;
 }
 
 .session_table_content {
     margin-top: 1rem;
+    width: 100%;
 }
 
 .sessionTable {
     width: 100%;
     border-collapse: collapse;
+    border-radius: 10px;
 }
 
     .sessionTable th,
@@ -294,6 +312,7 @@ body {
         padding: 0.5rem;
         border: 1px solid #ccc;
     }
+
 
     .sessionTable caption {
         text-align: left;
@@ -328,7 +347,7 @@ table {
     padding: 50px;
     margin-left: auto;
     margin-right: auto;
-    width: 90%;
+    width: 100%;
     display: block;
 }
 
@@ -347,7 +366,6 @@ table {
     margin-bottom: 25px;
     margin-left: auto;
     margin-right: auto;
-    width: 75%;
     display: block;
 }
 
@@ -397,7 +415,6 @@ table {
     margin-bottom: 25px;
     margin-left: auto;
     margin-right: auto;
-    width: 75%;
     display: block;
 }
 
