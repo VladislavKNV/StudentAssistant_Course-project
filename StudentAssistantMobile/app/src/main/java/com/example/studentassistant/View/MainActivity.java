@@ -26,12 +26,22 @@ import com.example.studentassistant.DataBase.DbLabs;
 import com.example.studentassistant.DataBase.DbSession;
 import com.example.studentassistant.DataBase.DbSubjects;
 import com.example.studentassistant.DataBase.DbUser;
+import com.example.studentassistant.Helpers.ApiInterface.RegistrationApi;
+import com.example.studentassistant.Model.ResponseModels.SessionResponse;
+import com.example.studentassistant.Model.SessionModel;
 import com.example.studentassistant.Model.SubjectModel;
+import com.example.studentassistant.Model.UserModel;
 import com.example.studentassistant.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,30 +60,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        db = new DbHelper(getApplicationContext()).getReadableDatabase();
-        db2 = new DbHelper(getApplicationContext()).getWritableDatabase();
-
-        Cursor cursor = DbUser.getAll(db);
-        cursor.moveToFirst();
-        if (cursor.moveToFirst()) {
-            int count = cursor.getInt(0);
-            if (count > 0) {
-                userId = cursor.getInt(0);
-                login = cursor.getString(2);
-                setContentView(R.layout.activity_main);
+        db = new DbHelper(getApplicationContext()).getWritableDatabase();
+            Cursor cursor = DbUser.getAll(db);
+            cursor.moveToFirst();
+            if (cursor.moveToFirst()) {
+                int count = cursor.getInt(0);
+                if (count > 0) {
+                    userId = cursor.getInt(0);
+                    login = cursor.getString(2);
+                    setContentView(R.layout.activity_main);
+                } else {
+                    Intent intent = new Intent(this, Authorization.class);
+                    startActivity(intent);
+                }
             } else {
                 Intent intent = new Intent(this, Authorization.class);
                 startActivity(intent);
             }
-        } else {
-            Intent intent = new Intent(this, Authorization.class);
-            startActivity(intent);
-        }
 
-        bind();
+            bind();
+            updateSub();
 
-        getSubjects();
-        info();
+            getSubjects();
+            info();
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         switch(id){
             case R.id.btSignOut:
                 try {
-                    if (DbUser.deleteUser(db2, userId) > 0) {
+                    if (DbUser.deleteUser(db, userId) > 0) {
                         Intent intent = new Intent(this, Authorization.class);
                         startActivity(intent);
                     } else {
@@ -169,6 +179,51 @@ public class MainActivity extends AppCompatActivity {
             subjects.add(subject);
         }
         cursor.close();
+    }
+
+    private void updateSub() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        RegistrationApi apiService = retrofit.create(RegistrationApi.class);
+
+        UserModel user = new UserModel(userId);
+        Call<SessionResponse> call = apiService.getSession(user);
+        call.enqueue(new Callback<SessionResponse>() {
+            @Override
+            public void onResponse(Call<SessionResponse> call, Response<SessionResponse> response) {
+                if (response.isSuccessful()) {
+                    SessionResponse sessionResponse = response.body();
+                    List<SessionModel> sessionList = sessionResponse.getSessionList();
+                    if (sessionList != null) {
+                        for (SessionModel sl : sessionList) {
+                            Cursor cursor = DbSession.getSessionBySubjectId(db, sl.getIdSubject());
+                            while(cursor.moveToNext()){
+                                if (cursor.getString(2) == sl.getType() && cursor.getString(3) == sl.getStatus() && cursor.getInt(4) == sl.getMark() && cursor.getString(5) == sl.getDateTime() && cursor.getString(6) == sl.getAuditorium()) {
+
+                                } else {
+                                    if (DbSession.updateFullSessionBySubjectId(db, cursor.getInt(1), sl.getType(), sl.getStatus(), sl.getMark(), sl.getDateTime(), sl.getAuditorium()) > 0) {
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                            }
+                            cursor.close();
+                        }
+                    }
+                    // Обработайте полученные данные
+                } else {
+                    // Обработайте ошибку
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SessionResponse> call, Throwable t) {
+                // Обработайте ошибку
+            }
+        });
     }
 
 

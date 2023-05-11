@@ -12,7 +12,9 @@ import android.widget.Toast;
 
 import com.example.studentassistant.DataBase.DbHelper;
 import com.example.studentassistant.DataBase.DbUser;
+import com.example.studentassistant.Helpers.ApiInterface.RegistrationApi;
 import com.example.studentassistant.Helpers.Hash;
+import com.example.studentassistant.Model.ResponseModels.ResponseModelUser;
 import com.example.studentassistant.Model.UserModel;
 import com.example.studentassistant.R;
 import com.google.android.material.textfield.TextInputEditText;
@@ -20,6 +22,12 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Registration extends AppCompatActivity {
 
@@ -58,7 +66,6 @@ public class Registration extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-
     }
 
     private void bind() {
@@ -85,12 +92,45 @@ public class Registration extends AppCompatActivity {
                 isPasswordValid(edtRegistrationPassword1.getText().toString(), edtRegistrationPassword2.getText().toString())) {
 
             try {
-                UserModel userModel = new UserModel(1, edtRegistrationLogin.getText().toString(), edtRegistrationEmail.getText().toString(), Hash.GetHash(edtRegistrationPassword1.getText().toString()));
-                if(DbUser.add(db, userModel) != -1) {
-                    Toast.makeText(this, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                } else Toast.makeText(this, "Ошибка регистрации", Toast.LENGTH_SHORT).show();
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl("http://93.125.10.36/Test/api/rest/")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+
+                UserModel userModel = new UserModel(2, edtRegistrationLogin.getText().toString(), edtRegistrationEmail.getText().toString(), edtRegistrationPassword1.getText().toString());
+
+                Call<ResponseModelUser> call = registrationApi.registerUser(userModel);
+                call.enqueue(new Callback<ResponseModelUser>() {
+                    @Override
+                    public void onResponse(Call<ResponseModelUser> call, Response<ResponseModelUser> response) {
+                        if (response.isSuccessful()) {
+                            ResponseModelUser responseModel = response.body();
+                            UserModel userModel = responseModel.getUserModel();
+
+                            int id = userModel.getId(); // Получаем идентификатор из объекта UserModel
+                            userModel.setId(id); // Устанавливаем идентификатор в объекте UserModel
+
+                            if(DbUser.add(db, userModel) != -1) {
+                                Toast.makeText(getApplicationContext(), "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Ошибка регистрации", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            // Обработка ошибки
+                            Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<ResponseModelUser> call, Throwable t) {
+                        // Обработка ошибки
+                        Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             } catch (Exception e) {
                 Toast.makeText(this, "Проверьте введенные данные", Toast.LENGTH_SHORT).show();
             }

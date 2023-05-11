@@ -1,5 +1,7 @@
 package com.example.studentassistant.View;
 
+import static com.example.studentassistant.DataBase.DbSession.getSessionBySubjectId;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -7,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,11 +26,20 @@ import com.example.studentassistant.DataBase.DbLabs;
 import com.example.studentassistant.DataBase.DbSession;
 import com.example.studentassistant.DataBase.DbSubjects;
 import com.example.studentassistant.DataBase.DbUser;
+import com.example.studentassistant.Helpers.ApiInterface.RegistrationApi;
 import com.example.studentassistant.Model.LabModel;
+import com.example.studentassistant.Model.ResponseModels.ResponseModelLab;
+import com.example.studentassistant.Model.SessionModel;
 import com.example.studentassistant.Model.SubjectModel;
 import com.example.studentassistant.R;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Labs extends AppCompatActivity {
 
@@ -73,21 +85,51 @@ public class Labs extends AppCompatActivity {
         int id = item.getItemId();
         switch(id){
             case R.id.btAddLab:
+                //
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl("http://93.125.10.36/Test/api/rest/")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
 
                 LabModel labModel = new LabModel(subjectId, 0);
-                if(DbLabs.add(db, labModel) != -1) {
-                    getLabs();
-                    labsListAdapter = new LabsListAdapter(this, labs);
-                    viewLabs.setAdapter(labsListAdapter);
-                } else Toast.makeText(this, "Ошибка добавления", Toast.LENGTH_SHORT).show();
+
+                Call<ResponseModelLab> call = registrationApi.addLab(labModel);
+                call.enqueue(new Callback<ResponseModelLab>() {
+                    @Override
+                    public void onResponse(Call<ResponseModelLab> call, Response<ResponseModelLab> response) {
+                        if (response.isSuccessful()) {
+                            ResponseModelLab responseModel = response.body();
+                            LabModel labModel = responseModel.getLabModel();
+
+                            int id = labModel.getId(); // Получаем идентификатор из объекта UserModel
+                            labModel.setId(id); // Устанавливаем идентификатор в объекте UserModel
+                            if(DbLabs.add(db, labModel) != -1) {
+                                getLabs();
+                                labsListAdapter = new LabsListAdapter(getApplicationContext(), labs);
+                                viewLabs.setAdapter(labsListAdapter);
+                            } else Toast.makeText(getApplicationContext(), "Ошибка добавления", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Обработка ошибки
+                            Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<ResponseModelLab> call, Throwable t) {
+                        // Обработка ошибки
+                        Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                //
                 return true;
             case R.id.btDelLab:
                 int count = labs.size() - 1;
-                if(DbLabs.deleteLab(db, labs.get(count).getId()) != -1) {
-                    getLabs();
-                    labsListAdapter = new LabsListAdapter(this, labs);
-                    viewLabs.setAdapter(labsListAdapter);
-                } else Toast.makeText(this, "Ошибка удаления", Toast.LENGTH_SHORT).show();
+                deleteLabApi(labs.get(count).getId());
+                getLabs();
+                labsListAdapter = new LabsListAdapter(this, labs);
+                viewLabs.setAdapter(labsListAdapter);
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -121,21 +163,9 @@ public class Labs extends AppCompatActivity {
             int countLabs = DbLabs.getNumberOfLabsBySubjectId(db, subjectId);
             int countLabsProtected = DbLabs.getNumberOfProtectedLabsBySubjectId(db, subjectId);
             if (countLabs == countLabsProtected) {
-                if (DbSession.updateSessionBySubjectId(db2, subjectId, "Допущен") > 0) {
-                    getLabs();
-                    labsListAdapter = new LabsListAdapter(this, labs);
-                    viewLabs.setAdapter(labsListAdapter);
-                } else {
-                    Toast.makeText(this, "Ошибка 2", Toast.LENGTH_SHORT).show();
-                }
+                updateSesssionApi("Допущен");
             } else {
-                if (DbSession.updateSessionBySubjectId(db2, subjectId, "Не допущен") > 0) {
-                    getLabs();
-                    labsListAdapter = new LabsListAdapter(this, labs);
-                    viewLabs.setAdapter(labsListAdapter);
-                } else {
-                    Toast.makeText(this, "Ошибка 2", Toast.LENGTH_SHORT).show();
-                }
+                updateSesssionApi("Не допущен");
             }
 
         } catch (Exception e) {
@@ -183,19 +213,117 @@ public class Labs extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     labs.get(pos).setLabProtected(isChecked ? 1 : 0); // устанавливаем значение поля labProtected объекта LabModel на основе состояния CheckBox
 
-                    // вызываем ваш метод updateLabs()
+                    // вызываем метод updateLabs()
                     if (isChecked) {
                         // если CheckBox отмечен
-                        updateLabs(labs.get(pos).getId(), 1);
+                        //updateLabs(labs.get(pos).getId(), 1);
+                        updateLabApi(labs.get(pos).getId(), 1);
                     } else {
                         // если CheckBox не отмечен
-                        updateLabs(labs.get(pos).getId(), 0);
+                        //updateLabs(labs.get(pos).getId(), 0);
+                        updateLabApi(labs.get(pos).getId(), 0);
                     }
                 }
             });
 
             return view;
         }
+    }
+
+    private void updateLabApi(int idPos, int LabProtPos) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+        LabModel labModel = new LabModel(idPos, subjectId, LabProtPos);
+        registrationApi.updateLab(labModel).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Обновление данных прошло успешно (статус код 200)
+                    updateLabs(idPos, LabProtPos);
+                } else {
+                    // Обновление данных не удалось
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Обновление данных не удалось
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateSesssionApi(String newStatus) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+        SessionModel sessionModel = null;
+        Cursor cursor = DbSession.getSessionBySubjectId(db, subjectId);
+        while(cursor.moveToNext()){
+            sessionModel = new SessionModel(cursor.getInt(0), cursor.getInt(1), cursor.getString(2), newStatus, cursor.getInt(4), cursor.getString(5), cursor.getString(6));
+        }
+        cursor.close();
+
+        registrationApi.updateSession(sessionModel).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Обновление данных прошло успешно (статус код 200)
+                    if (DbSession.updateSessionBySubjectId(db2, subjectId, newStatus) > 0) {
+                        getLabs();
+                        labsListAdapter = new LabsListAdapter(getApplicationContext(), labs);
+                        viewLabs.setAdapter(labsListAdapter);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Обновление данных не удалось
+                    Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Обновление данных не удалось
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deleteLabApi(int idDel) {//допил
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+        LabModel labModel = new LabModel(38, 17, 0);
+        registrationApi.deleteLab(labModel).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Обновление данных прошло успешно (статус код 200)
+                    if(DbLabs.deleteLab(db, idDel) != -1) {
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Обновление данных не удалось
+                    Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Обновление данных не удалось
+                Log.e("DeleteLabApi", "Failed to delete lab", t);
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

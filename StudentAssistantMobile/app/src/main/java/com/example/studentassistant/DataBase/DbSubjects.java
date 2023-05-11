@@ -14,6 +14,7 @@ public class DbSubjects {
     public static long add(SQLiteDatabase db, SubjectModel subjectModel) {
         ContentValues values = new ContentValues();
 
+        values.put("IDSUBJECT", subjectModel.getId());
         values.put("USERID", subjectModel.getIdUser());
         values.put("SUBJECTNAME", subjectModel.getSubjectName());
 

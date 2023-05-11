@@ -1,28 +1,32 @@
 package com.example.studentassistant.Model;
 
 public class LabModel {
-    private int id;
-    private int id_subject;
-    private int labProtected;
+    private int LabsId;
+    private int SubjectsId;
+    private int LabProtected;
+
+    public LabModel(int id) {
+        this.LabsId = id;
+    }
 
     public LabModel(int id_subject, int labProtected) {
-        this.id_subject = id_subject;
-        this.labProtected = labProtected;
+        this.SubjectsId = id_subject;
+        this.LabProtected = labProtected;
     }
 
     public LabModel( int id, int id_subject, int labProtected) {
-        this.id = id;
-        this.id_subject = id_subject;
-        this.labProtected = labProtected;
+        this.LabsId = id;
+        this.SubjectsId = id_subject;
+        this.LabProtected = labProtected;
     }
 
 
-    public int getId() {return id;}
-    public int getIdSubject() {return id_subject;}
-    public int getLabProtected() {return labProtected;}
+    public int getId() {return LabsId;}
+    public int getIdSubject() {return SubjectsId;}
+    public int getLabProtected() {return LabProtected;}
 
-    public void setId(int id) {this.id = id;}
-    public void setIdSubject(int id_subject) {this.id_subject = id_subject;}
-    public void setLabProtected(int labProtected) {this.labProtected = labProtected;}
+    public void setId(int id) {this.LabsId = id;}
+    public void setIdSubject(int id_subject) {this.SubjectsId = id_subject;}
+    public void setLabProtected(int labProtected) {this.LabProtected = labProtected;}
 }
 

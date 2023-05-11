@@ -14,7 +14,8 @@ public class DbUser {
     public static long add(SQLiteDatabase db, UserModel userModel) {
         ContentValues values = new ContentValues();
 
-        values.put("ROLEID", userModel.getIdRole());
+        values.put("IDUSER", userModel.getId());
+        values.put("ROLEID", userModel.getRoleId());
         values.put("LOGIN", userModel.getLogin());
         values.put("EMAIL", userModel.getEmail());
         values.put("PASSWORD", userModel.getPassword());

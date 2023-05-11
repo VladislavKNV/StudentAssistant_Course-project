@@ -229,6 +229,64 @@ namespace StudentAssistant.Controllers
 			}
 		}
 
+		[HttpPost]
+		public HttpResponseMessage AddSessionApi([FromBody] Session sessionModel)
+		{
+			if (repositoryAuthentication.SubjectExists(sessionModel.SubjectId) == false)
+			{
+				return new HttpResponseMessage(HttpStatusCode.BadRequest)
+				{
+					Content = new StringContent("Предмета не существует")
+				};
+			}
+			int id = repositoryAuthentication.AddSession(sessionModel);
+			if (id != -1)
+			{
+				var session = repositoryAuthentication.GetSessionById(id);
+				// Формируем ответ с данными пользователя
+				var responseData = new
+				{
+					SessionModel = session,
+				};
+
+				// Возвращаем данные в формате JSON
+				var response = Request.CreateResponse(HttpStatusCode.OK);
+				response.Content = new StringContent(JsonConvert.SerializeObject(responseData), System.Text.Encoding.UTF8, "application/json");
+				return response;
+			}
+			else
+			{
+				return new HttpResponseMessage(HttpStatusCode.BadRequest)
+				{
+					Content = new StringContent("Error")
+				};
+			}
+		}
+
+		[HttpPost]
+		public HttpResponseMessage GetSessionApi([FromBody] Users userModel)
+		{
+			var sessionList = new List<Session>();
+			var subjectsList = new List<Subjects>();
+			subjectsList = repositoryAuthentication.GetSubjects(userModel.id.ToString());
+
+			foreach (var subject in subjectsList)
+			{
+				sessionList.AddRange(repositoryAuthentication.GetSessions(subject.SubjectId));	
+			}
+
+			// Формируем ответ с данными пользователя
+			var responseData = new
+			{
+				SessionModel = sessionList,
+			};
+
+			// Возвращаем данные в формате JSON
+			var response = Request.CreateResponse(HttpStatusCode.OK);
+			response.Content = new StringContent(JsonConvert.SerializeObject(responseData), System.Text.Encoding.UTF8, "application/json");
+			return response;
+
+		}
 
 		[HttpPut]
 		public IHttpActionResult UpdateLabApi([FromBody] Labs labModel)
@@ -247,6 +305,19 @@ namespace StudentAssistant.Controllers
 		public IHttpActionResult UpdateSubjectApi([FromBody] Subjects subjectsModel)
 		{
 			if (repositoryAuthentication.UpdateSubjects(subjectsModel))
+			{
+				return Ok("ok");
+			}
+			else
+			{
+				return BadRequest("error");
+			}
+		}
+
+		[HttpPut]
+		public IHttpActionResult UpdateSesssionApi([FromBody] Session sessionModel)
+		{
+			if (repositoryAuthentication.UpdateSession2(sessionModel.SessionId, sessionModel.SubjectId, sessionModel.Type, sessionModel.Status))
 			{
 				return Ok("ok");
 			}

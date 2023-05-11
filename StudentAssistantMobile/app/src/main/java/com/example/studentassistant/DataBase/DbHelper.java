@@ -34,7 +34,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 + "ROLENAME text                                        );  "
         );
         db.execSQL("create table " + USER_TABLE + " (                           "
-                + "IDUSER integer primary key autoincrement not null,           "
+                + "IDUSER integer primary key not null,           "
                 + "ROLEID integer,                                              "
                 + "LOGIN text not null UNIQUE,                                  "
                 + "EMAIL text not null UNIQUE,                                  "
@@ -43,21 +43,21 @@ public class DbHelper extends SQLiteOpenHelper {
                 + " on delete cascade                                        ); "
         );
         db.execSQL("create table " + SUBJECTS_TABLE + " (                       "
-                + "IDSUBJECT integer primary key autoincrement not null,        "
+                + "IDSUBJECT integer primary key not null,        "
                 + "USERID integer,                                              "
                 + "SUBJECTNAME text not null UNIQUE,                            "
                 + "foreign key(USERID) references " + USER_TABLE + "(IDUSER)    "
                 + " on delete cascade                                       );  "
         );
         db.execSQL("create table " + LABS_TABLE + " (                                   "
-                + "IDLAB integer primary key autoincrement not null,                    "
+                + "IDLAB integer primary key not null,                    "
                 + "SUBJECTID integer,                                                   "
                 + "LABPROTECTED integer not null,                                       "
                 + "foreign key(SUBJECTID) references " + SUBJECTS_TABLE + "(IDSUBJECT)  "
                 + " on delete cascade                                                 );"
         );
         db.execSQL("create table " + SESSION_TABLE + " (                                "
-                + "IDSESSION integer primary key autoincrement not null,                "
+                + "IDSESSION integer primary key not null,                "
                 + "SUBJECTID integer,                                                   "
                 + "TYPE text not null,                                                  "
                 + "STATUS text not null,                                                "

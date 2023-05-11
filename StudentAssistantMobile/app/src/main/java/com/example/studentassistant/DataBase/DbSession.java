@@ -12,6 +12,7 @@ public class DbSession {
     public static long add(SQLiteDatabase db, SessionModel sessionModel) {
         ContentValues values = new ContentValues();
 
+        values.put("IDSESSION", sessionModel.getId());
         values.put("SUBJECTID", sessionModel.getIdSubject());
         values.put("TYPE", sessionModel.getType());
         values.put("STATUS", sessionModel.getStatus());
@@ -71,6 +72,18 @@ public class DbSession {
         ContentValues values = new ContentValues();
 
         values.put("STATUS", newStatus);
+
+        return db.update(SESSION_TABLE, values, "SUBJECTID = ?", new String[] { String.valueOf(id) });
+    }
+
+    public static long updateFullSessionBySubjectId(SQLiteDatabase db, int id, String newType, String newStatus, int newMark, String newDateTime, String newAuditorium) {//допилить
+        ContentValues values = new ContentValues();
+
+        values.put("TYPE", newType);
+        values.put("STATUS", newStatus);
+        values.put("MARK", newMark);
+        values.put("DATETIME", newDateTime);
+        values.put("AUDITORIUM", newAuditorium);
 
         return db.update(SESSION_TABLE, values, "SUBJECTID = ?", new String[] { String.valueOf(id) });
     }

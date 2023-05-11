@@ -33,13 +33,25 @@ import com.example.studentassistant.DataBase.DbLabs;
 import com.example.studentassistant.DataBase.DbSession;
 import com.example.studentassistant.DataBase.DbSubjects;
 import com.example.studentassistant.DataBase.DbUser;
+import com.example.studentassistant.Helpers.ApiInterface.RegistrationApi;
+import com.example.studentassistant.Helpers.Hash;
 import com.example.studentassistant.Model.LabModel;
+import com.example.studentassistant.Model.ResponseModels.ResponseModelLab;
+import com.example.studentassistant.Model.ResponseModels.ResponseModelSession;
+import com.example.studentassistant.Model.ResponseModels.ResponseModelSubject;
+import com.example.studentassistant.Model.ResponseModels.ResponseModelUser;
 import com.example.studentassistant.Model.SessionModel;
 import com.example.studentassistant.Model.SubjectModel;
 import com.example.studentassistant.Model.UserModel;
 import com.example.studentassistant.R;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Subjects extends AppCompatActivity {
     private int userId;
@@ -137,33 +149,71 @@ public class Subjects extends AppCompatActivity {
                             Toast.makeText(context, "Введите корректные данные", Toast.LENGTH_SHORT).show();
                         } else {
                             try {
+
+                                ///////////////////////////////
+                                Retrofit retrofit = new Retrofit.Builder()
+                                        .baseUrl("http://93.125.10.36/Test/api/rest/")
+                                        .addConverterFactory(GsonConverterFactory.create())
+                                        .build();
+
+                                RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+
                                 SubjectModel subjectModel = new SubjectModel(userId, subjectName);
-                                if (DbSubjects.add(db, subjectModel) != -1) {
-                                    Toast.makeText(context, "Предмет добавлен: " + subjectName, Toast.LENGTH_SHORT).show();
-                                    updateAdapter();
-                                } else
-                                    Toast.makeText(context, "Ошибка добавления. Возможно такой предмет уже существует", Toast.LENGTH_SHORT).show();
 
-                                LabModel labModel = new LabModel(getSubjectIdBySubjectName(subjectName), 0);
-                                for (int i = 0; i < count; i++) {
-                                    if (DbLabs.add(db, labModel) != -1) {
-                                    } else
-                                        Toast.makeText(context, "Ошибка добавления", Toast.LENGTH_SHORT).show();
-                                }
+                                Call<ResponseModelSubject> call = registrationApi.addSubject(subjectModel);
+                                int finalCount = count;
+                                call.enqueue(new Callback<ResponseModelSubject>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseModelSubject> call, Response<ResponseModelSubject> response) {
+                                        if (response.isSuccessful()) {
+                                            ResponseModelSubject responseModel = response.body();
+                                            SubjectModel subjectModel = responseModel.getSubjectModel();
 
-                                SessionModel sessionModel = new SessionModel(getSubjectIdBySubjectName(subjectName), sessionType, "Не допущен");
-                                if (DbSession.add(db, sessionModel) != -1) {
-                                } else
-                                    Toast.makeText(context, "Ошибка добавления", Toast.LENGTH_SHORT).show();
+                                            int id = subjectModel.getId(); // Получаем идентификатор из объекта UserModel
+                                            subjectModel.setId(id); // Устанавливаем идентификатор в объекте UserModel
+
+                                            if (DbSubjects.add(db, subjectModel) != -1) {
+                                                Toast.makeText(context, "Предмет добавлен: " + subjectName, Toast.LENGTH_SHORT).show();
+                                                for (int i = 0; i < finalCount; i++) {
+                                                    addLabApi(subjectName);
+                                                }
+                                                addSessionApi(subjectName);
+                                                updateAdapter();
+                                            } else {
+                                                Toast.makeText(context, "Ошибка добавления. Возможно такой предмет уже существует", Toast.LENGTH_SHORT).show();
+                                            }
+                                        } else {
+                                            // Обработка ошибки
+                                            Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                    @Override
+                                    public void onFailure(Call<ResponseModelSubject> call, Throwable t) {
+                                        // Обработка ошибки
+                                        Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+//                                LabModel labModel = new LabModel(getSubjectIdBySubjectName(subjectName), 0);
+//                                for (int i = 0; i < count; i++) {
+//                                    if (DbLabs.add(db, labModel) != -1) {
+//                                    } else
+//                                        Toast.makeText(context, "Ошибка добавления", Toast.LENGTH_SHORT).show();
+//                                }
+/////////////////////////////////////////////
+//                                SessionModel sessionModel = new SessionModel(getSubjectIdBySubjectName(subjectName), sessionType, "Не допущен");
+//                                if (DbSession.add(db, sessionModel) != -1) {
+//                                } else
+//                                    Toast.makeText(context, "Ошибка добавления", Toast.LENGTH_SHORT).show();
 
 
                             } catch (Exception e) {
                                 Toast.makeText(context, "Ошибка", Toast.LENGTH_SHORT).show();
                             }
+
                         }
                         }
                     }
-
                 })
                 .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
                     @Override
@@ -192,10 +242,7 @@ public class Subjects extends AppCompatActivity {
                         String subjectName = edit_text_subject_name.getText().toString();
                         //изменение предмета в базе данных
                         try {
-                            if(DbSubjects.updateSubjectById(db, id, subjectName) != -1) {
-                                Toast.makeText(context, "Изменено на: " + subjectName, Toast.LENGTH_SHORT).show();
-                                updateAdapter();
-                            } else Toast.makeText(context, "Ошибка изменения", Toast.LENGTH_SHORT).show();
+                            updateSubjectApi(id, subjectName);
                         } catch (Exception e) {
                             Toast.makeText(context, "Ошибка", Toast.LENGTH_SHORT).show();
                         }
@@ -231,11 +278,12 @@ public class Subjects extends AppCompatActivity {
             @Override
             public void onDelete(int id) {
                 try {
-                    if (DbSubjects.deleteSubject(db, id) > 0) {
-                        updateAdapter();
-                    } else {
-                        Toast.makeText(Subjects.this, "Ошибка", Toast.LENGTH_SHORT).show();
-                    }
+                    deleteSubjectApi(id);
+//                    if (DbSubjects.deleteSubject(db, id) > 0) {
+//                        updateAdapter();
+//                    } else {
+//                        Toast.makeText(Subjects.this, "Ошибка", Toast.LENGTH_SHORT).show();
+//                    }
                 } catch (Exception e) {
                     Toast.makeText(Subjects.this, "Ошибка", Toast.LENGTH_SHORT).show();
                 }
@@ -330,6 +378,137 @@ public class Subjects extends AppCompatActivity {
 
             return view;
         }
+    }
+
+    private void addLabApi(String subjectName) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+
+        LabModel labModel = new LabModel(getSubjectIdBySubjectName(subjectName), 0);
+
+        Call<ResponseModelLab> call = registrationApi.addLab(labModel);
+        call.enqueue(new Callback<ResponseModelLab>() {
+            @Override
+            public void onResponse(Call<ResponseModelLab> call, Response<ResponseModelLab> response) {
+                if (response.isSuccessful()) {
+                    ResponseModelLab responseModel = response.body();
+                    LabModel labModel = responseModel.getLabModel();
+
+                    int id = labModel.getId(); // Получаем идентификатор из объекта UserModel
+                    labModel.setId(id); // Устанавливаем идентификатор в объекте UserModel
+                    if (DbLabs.add(db, labModel) != -1) {
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "Ошибка добавления", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Обработка ошибки
+                    Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseModelLab> call, Throwable t) {
+                // Обработка ошибки
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void addSessionApi(String subjectName) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+
+        SessionModel sessionModel = new SessionModel(getSubjectIdBySubjectName(subjectName), sessionType, "Не допущен");
+
+        Call<ResponseModelSession> call = registrationApi.addSession(sessionModel);
+        call.enqueue(new Callback<ResponseModelSession>() {
+            @Override
+            public void onResponse(Call<ResponseModelSession> call, Response<ResponseModelSession> response) {
+                if (response.isSuccessful()) {
+                    ResponseModelSession responseModel = response.body();
+                    SessionModel sessionModel = responseModel.getSessionModel();
+
+                    int id = sessionModel.getId(); // Получаем идентификатор из объекта UserModel
+                    sessionModel.setId(id); // Устанавливаем идентификатор в объекте UserModel
+                    if (DbSession.add(db, sessionModel) != -1) {
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Ошибка добавления", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Обработка ошибки
+                    Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseModelSession> call, Throwable t) {
+                // Обработка ошибки
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateSubjectApi(int idSubForUpdate, String newName) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+        SubjectModel subjectModel = new SubjectModel(idSubForUpdate, userId, newName);
+        registrationApi.updateSubject(subjectModel).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Обновление данных прошло успешно (статус код 200)
+                    if(DbSubjects.updateSubjectById(db, idSubForUpdate, newName) != -1) {
+                        Toast.makeText(getApplicationContext(), "Изменено на: " + newName, Toast.LENGTH_SHORT).show();
+                        updateAdapter();
+                    } else Toast.makeText(getApplicationContext(), "Ошибка изменения", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Обновление данных не удалось
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Обновление данных не удалось
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deleteSubjectApi(int idSubForDel) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi registrationApi = retrofit.create(RegistrationApi.class);
+        SubjectModel subjectModel = new SubjectModel(idSubForDel);
+        registrationApi.deleteSubject(subjectModel).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (DbSubjects.deleteSubject(db, idSubForDel) > 0) {
+                    updateAdapter();
+                } else {
+                    Toast.makeText(Subjects.this, "Ошибка", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Обновление данных не удалось
+                Toast.makeText(getApplicationContext(), "Произошла ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

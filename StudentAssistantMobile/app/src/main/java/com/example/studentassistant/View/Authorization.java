@@ -5,16 +5,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.example.studentassistant.DataBase.DbHelper;
+import com.example.studentassistant.Helpers.ApiInterface.RegistrationApi;
 import com.example.studentassistant.Helpers.Hash;
-import com.example.studentassistant.Helpers.MyApi;
+import com.example.studentassistant.Model.LabModel;
+import com.example.studentassistant.Model.ResponseModels.AuthenticateResponse;
+import com.example.studentassistant.Model.SessionModel;
+import com.example.studentassistant.Model.SubjectModel;
 import com.example.studentassistant.Model.UserModel;
 import com.example.studentassistant.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.List;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,7 +36,6 @@ public class Authorization extends AppCompatActivity {
     private TextInputEditText edtAuthorizationPassword;
     private TextInputLayout edtAuthorizationPassword1;
     private SQLiteDatabase db;
-    private MyApi myApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +43,7 @@ public class Authorization extends AppCompatActivity {
         setContentView(R.layout.activity_authorization);
         bind();
 
-        // Создаем объект Retrofit с базовым URL и конвертером для преобразования JSON
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://example.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
 
-        // Создаем объект API с использованием интерфейса MyApi
-        myApi = retrofit.create(MyApi.class);
     }
 
     private void bind() {
@@ -54,25 +54,46 @@ public class Authorization extends AppCompatActivity {
         db = new DbHelper(getApplicationContext()).getReadableDatabase();
     }
 
-    private void Auth() {
+    public void Auth(View view) {
+        try {
+            aaa();
+        } catch (Exception e) {
+            Log.e("DeleteLabApi", "Failed to delete lab", e);
+        }
 
-        //добавить проверки введенных данных
-        UserModel user = new UserModel(edtAuthorizationLogin.getText().toString(),  Hash.GetHash(edtAuthorizationPassword.getText().toString()));
-        Call<String> call = myApi.authenticateUser(user);
-        call.enqueue(new Callback<String>() {
+
+    }
+
+    public void aaa() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://93.125.10.36/Test/api/rest/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RegistrationApi api = retrofit.create(RegistrationApi.class);
+
+        UserModel userModel = new UserModel(edtAuthorizationLogin.getText().toString(), Hash.GetHash(edtAuthorizationPassword.getText().toString()));
+        Call<AuthenticateResponse> call = api.authenticateUser(userModel);
+        call.enqueue(new Callback<AuthenticateResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<AuthenticateResponse> call, Response<AuthenticateResponse> response) {
                 if (response.isSuccessful()) {
-                    String result = response.body();
-                    // Обработка ответа
+                    AuthenticateResponse authenticateResponse = response.body();
+                    UserModel userModel = authenticateResponse.userModel;
+                    List<SubjectModel> subjectsList = authenticateResponse.subjectsList;
+                    List<LabModel> labsList = authenticateResponse.labsList;
+                    List<SessionModel> sessionList = authenticateResponse.sessionList;
+
+                    // Вы можете здесь использовать полученные данные для отображения на экране
                 } else {
                     // Обработка ошибки
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<AuthenticateResponse> call, Throwable t) {
                 // Обработка ошибки
+                Log.e("DeleteLabApi", "Failed to delete lab", t);
             }
         });
     }

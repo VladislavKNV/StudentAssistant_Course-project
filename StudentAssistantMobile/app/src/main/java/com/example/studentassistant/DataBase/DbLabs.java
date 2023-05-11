@@ -14,6 +14,7 @@ public class DbLabs {
     public static long add(SQLiteDatabase db, LabModel labModel) {
         ContentValues values = new ContentValues();
 
+        values.put("IDLAB", labModel.getId());
         values.put("SUBJECTID", labModel.getIdSubject());
         values.put("LABPROTECTED", labModel.getLabProtected());
 

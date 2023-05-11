@@ -15,8 +15,8 @@ namespace StudentAssistant.Repository
 	public class RepositoryAuthentication
 	{
 		//Строка подключение к бд
-		//string connectionString = "Server=93.125.10.36;Database=StudenAssistant;Integrated Security=false;User Id=Vlad;Password=50511007;";
-		string connectionString = "Data Source=(local);Initial Catalog=StudentAssistant;Integrated Security=true";
+		string connectionString = "Server=93.125.10.36;Database=StudenAssistant;Integrated Security=false;User Id=Vlad;Password=50511007;";
+		//string connectionString = "Data Source=(local);Initial Catalog=StudentAssistant;Integrated Security=true";
 		//Хеширование
 		/// <summary>
 		/// 
@@ -507,6 +507,64 @@ namespace StudentAssistant.Repository
 			return sessionList;
 		}
 
+		public Session GetSessionById(int sessionId)
+		{
+			Session session = null;
+			var queryString = "select id, SubjectId, Type, Status, Mark, DateTime, Auditorium from Session where id=@id";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@id", sessionId);
+				connection.Open();
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						object dbVal = null;
+
+						session = new Session();
+						session.SessionId = (int)reader.GetValue(0);
+						session.SubjectId = (int)reader.GetValue(1);
+
+						dbVal = reader.GetValue(2);
+						if (!(dbVal is DBNull))
+						{
+							session.Type = (dbVal as string).Trim();
+						}
+
+						dbVal = reader.GetValue(3);
+						if (!(dbVal is DBNull))
+						{
+							session.Status = (dbVal as string).Trim();
+						}
+
+						dbVal = reader.GetValue(4);
+						if (!(dbVal is DBNull))
+						{
+							session.Mark = reader.GetInt32(4);
+						}
+
+						dbVal = reader.GetValue(5);
+						if (!(dbVal is DBNull))
+						{
+							session.DateTime = (dbVal as string).Trim();
+						}
+
+						dbVal = reader.GetValue(6);
+						if (!(dbVal is DBNull))
+						{
+							session.Auditorium = (dbVal as string).Trim();
+						}
+					}
+				}
+			}
+
+			return session;
+		}
+
+
 		public bool UpdateMark(int Mark, int subjectId)
 		{
 			var session = new List<Session>();
@@ -555,6 +613,37 @@ namespace StudentAssistant.Repository
 						command.Parameters.AddWithValue("@SubjectId", item.SubjectId);
 						command.Parameters.AddWithValue("@DateTime", dateTime);
 						command.Parameters.AddWithValue("@Auditorium", auditorium);
+
+						connection.Open();
+						var reader = command.ExecuteReader();
+						reader.Read();
+					}
+				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		public bool UpdateSession2(int id, int subjectId, string Type, string Status)
+		{
+			var session = new List<Session>();
+			session = GetSessions(subjectId);
+
+			if (session != null)
+			{
+				var queryString = "Update Session Set Type = @Type, Status = @Status where id = @id";
+				using (SqlConnection connection = new SqlConnection(connectionString))
+				{
+					foreach (var item in session)
+					{
+						// Create the Command and Parameter objects.
+						var command = new SqlCommand(queryString, connection);
+						command.Parameters.AddWithValue("@id", id);
+						command.Parameters.AddWithValue("@Type", Type);
+						command.Parameters.AddWithValue("@Status", Status);
 
 						connection.Open();
 						var reader = command.ExecuteReader();
@@ -655,6 +744,29 @@ namespace StudentAssistant.Repository
 				var command = new SqlCommand(queryString, connection);
 				command.Parameters.AddWithValue("@SubjectId", SubjectsId);
 				command.Parameters.AddWithValue("@LabProtected", 0);
+
+				connection.Open();
+
+				var result = command.ExecuteScalar();
+				if (result == null)
+				{
+					return -1;
+				}
+
+				return (int)result;
+			}
+		}
+
+		public int AddSession(Session session)
+		{
+			var queryString = "INSERT INTO Session (SubjectId, Type, Status) OUTPUT INSERTED.Id VALUES (@SubjectId, @Type, @Status)";
+
+			using (var connection = new SqlConnection(connectionString))
+			{
+				var command = new SqlCommand(queryString, connection);
+				command.Parameters.AddWithValue("@SubjectId", session.SubjectId);
+				command.Parameters.AddWithValue("@Type", session.Type);
+				command.Parameters.AddWithValue("@Status", session.Status);
 
 				connection.Open();
 

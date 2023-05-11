@@ -165,7 +165,13 @@
     <Content Include="Content\Images\AAA.jpg" />
     <Content Include="Content\Images\facebook.svg" />
     <Content Include="Content\Images\logo.jpeg" />
+    <Content Include="Content\Images\logo_4.jpeg" />
     <Content Include="Content\Images\Slider_1_test_2.png" />
+    <Content Include="Content\Images\Slider_1_test_3.jpeg" />
+    <Content Include="Content\Images\Slider_2_test_1.jpeg" />
+    <Content Include="Content\Images\Slider_2_test_2.jpeg" />
+    <Content Include="Content\Images\Slider_3_test_1.jpeg" />
+    <Content Include="Content\Images\Slider_3_test_2.jpeg" />
     <Content Include="Content\Images\telegram.svg" />
     <Content Include="Content\Images\twitter.svg" />
     <Content Include="Content\Styles\MainStyles.css" />
